@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [ "docking-experimental", "glfw-binding", "opengl3-binding" ]
+    },
+    "glfw3",
+    "glad",
+    "assimp",
+    "glm"
+  ],
+  "name": "pyewton",
+  "version": "0.1"
+}
