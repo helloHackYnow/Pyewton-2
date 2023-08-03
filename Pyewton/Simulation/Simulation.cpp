@@ -23,7 +23,7 @@ void Simulate(std::vector<Body>* bodyList, float simulated_duration)
 
 					glm::vec3 attraction_local = vec_ij / dst;
 
-					attraction_local *= (list[i].mass * list[j].mass) / (dst * dst);
+					attraction_local *= (list[i].mass * list[j].mass) / dst;
 					attraction += attraction_local;
 				}
 			}
@@ -39,7 +39,9 @@ void Simulate(std::vector<Body>* bodyList, float simulated_duration)
 		if (list[i].isAffected)
 		{
 			//Update the position
+
 			list[i].position += list[i].velocity * simulated_duration;
+			list[i].orbit.AppendPoint(list[i].position);
 		}
 	}
 }

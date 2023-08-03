@@ -5,7 +5,6 @@
 #include "Body/Body.h"
 #include <filesystem>
 #include <string>
-#include "Framebuffer.h"
 #include <imgui_impl_glfw.h>
 #include "Simulation/Simulation.h"
 
@@ -35,6 +34,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+	glfwWindowHint(GLFW_SAMPLES, 4); //Antialiasing
+
 
 	// Create window with graphics context
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Pyewton Sandbox", NULL, NULL);
@@ -47,6 +48,8 @@ int main()
 		throw("Unable to context to OpenGL");
 	
 	glEnable(GL_DEPTH_TEST);
+
+
 
 	int screen_width, screen_height;
 	glfwGetFramebufferSize(window, &screen_width, &screen_height);

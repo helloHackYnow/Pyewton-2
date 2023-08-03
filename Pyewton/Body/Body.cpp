@@ -59,6 +59,7 @@ glm::vec3 Body::getPos()
 
 void Body::Draw(Shader shader)
 {
+	shader.use();
 	glm::mat4 modelMat = glm::mat4(1.0f);
 	modelMat = glm::translate(modelMat, position); // translate it down so it's at the center of the scene
 	modelMat = glm::scale(modelMat, glm::vec3(size));	// it's a bit too big for our scene, so scale it down

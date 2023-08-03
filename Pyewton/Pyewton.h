@@ -1,7 +1,6 @@
 #pragma once
 
 #include <imgui.h>
-#include "Framebuffer.h"
 #include "Body/Body.h"
 #include "Renderer/Renderer.h"
 #include <GLFW/glfw3.h>
@@ -34,12 +33,6 @@ private:
 	void DrawSimulationSettings();
 
 private:
-	void InitFbo();
-	void rescaleFbo();
-
-	unsigned int fboID;
-	unsigned int texID;
-	unsigned int rboID;
 
 	int render_width;
 	int render_height;

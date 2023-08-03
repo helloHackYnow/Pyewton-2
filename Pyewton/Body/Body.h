@@ -6,6 +6,7 @@
 #include "../Renderer/Light.h"
 #include <glm/glm.hpp>
 #include "../Renderer/Color.h"
+#include "Orbit.h"
 class Body
 {
 public:
@@ -41,6 +42,8 @@ public:
 
 	bool affectOther = true;
 	bool isAffected = true;
+
+	Orbit orbit;
 
 private:
 	Model model;

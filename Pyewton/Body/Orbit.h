@@ -12,23 +12,21 @@ const int MAX_ORBIT_POINT = 1000;
 class Orbit
 {
 public:
-	Orbit(Shader orbitShader);
-	~Orbit();
+	Orbit();
 
 	void AppendPoint(glm::vec3 point);
 
-	void DrawOrbit(glm::mat4 projection, glm::mat4 view, glm::mat4 model);
+	void Draw(Shader shader);
+
+	void SetColor(Color color);
 
 
+	std::vector<glm::vec3> vertexList;
 	
 
 private:
 	unsigned int VAO;
 	unsigned int VBO;
-
-	std::vector<glm::vec3> vertexList;
-
-	Shader shader;
 	
 	Color orbitColor;
 

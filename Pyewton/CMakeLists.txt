@@ -26,7 +26,7 @@ file(GLOB_RECURSE 3D_FILES
 	CONFIGURE_DEPENDS
 	*.obj)
 
-add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Framebuffer.h" "Framebuffer.cpp" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} )
+add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} )
 
 set_property(TARGET Pyewton PROPERTY CXX_STANDARD 20)
 

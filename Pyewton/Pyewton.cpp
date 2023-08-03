@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 Pyewton::Pyewton()
 {
-	
+	 
 }
 
 void Pyewton::Init(GLFWwindow* window_, const char* glsl_version) {
@@ -26,16 +26,29 @@ void Pyewton::Init(GLFWwindow* window_, const char* glsl_version) {
 
 	glfwGetWindowSize(window_, &render_width, &render_height);
 
-	//Init renderer
-	InitFbo();
-
 	//setup Renderer
 	fs::path current_dir = fs::current_path();
+
 	fs::path vertex_path("shader_dir/vertex.glsl");
 	fs::path fragment_path("shader_dir/fragment.glsl");
 	fs::path full_v = current_dir / vertex_path;
 	fs::path full_f = current_dir / fragment_path;
-	renderer.InitRenderer(full_v.string().data(), full_f.string().data(), 800, 600);
+
+	fs::path orbit_v("shader_dir/orbit_v.glsl");
+	fs::path orbit_f("shader_dir/orbit_f.glsl");
+	fs::path f_orbit_v = current_dir / orbit_v;
+	fs::path f_orbit_f = current_dir / orbit_f;
+
+	renderer.InitRenderer(800, 600);
+
+	renderer.mainShader = renderer.AddShader(full_v.string().data(), full_f.string().data());
+	
+	renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedAmbientLight);
+	renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedLightPoints);
+	renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedCameraInfo);
+
+	renderer.orbitShader = renderer.AddShader(f_orbit_v.string().data(), f_orbit_f.string().data());
+	renderer.SetShaderFlag(renderer.orbitShader, shaderFlags_NeedCameraInfo);
 
 	//setup body list
 	Body sphere1;
@@ -184,10 +197,7 @@ void Pyewton::RenderUI() {
 
 void Pyewton::RenderScene()
 {
-	glViewport(0, 0, render_width, render_height);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-	renderer.Render(bodyList, fboID);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	renderer.Render(bodyList);
 }
 
 void Pyewton::Shutdown() {
@@ -211,8 +221,7 @@ void Pyewton::DrawViewport()
 	render_height = wsize.y;
 	//reste viewport for the renderer
 	renderer.setViewport(render_width, render_height);
-	rescaleFbo();
-	ImGui::Image((ImTextureID)texID, wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)renderer.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::EndChild();
 	ImGui::End();
@@ -276,43 +285,4 @@ void Pyewton::DrawSimulationSettings()
 	ImGui::End();
 }
 
-void Pyewton::InitFbo()
-{
-	glGenFramebuffers(1, &fboID);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, render_width, render_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
-
-	glGenRenderbuffers(1, &rboID);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboID);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, render_width, render_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboID);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n";
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
-
-void Pyewton::rescaleFbo()
-{
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, render_width, render_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
-
-	glBindRenderbuffer(GL_RENDERBUFFER, rboID);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, render_width, render_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboID);
-
-	
-}
 
