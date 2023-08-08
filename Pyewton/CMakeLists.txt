@@ -20,13 +20,15 @@ file(GLOB_RECURSE SIMULATION_FILES
 
 file(GLOB_RECURSE SHADER_FILES
 	CONFIGURE_DEPENDS
-	*.glsl)
+	*.glsl
+	*.frag
+	*.vert)
 
 file(GLOB_RECURSE 3D_FILES
 	CONFIGURE_DEPENDS
 	*.obj)
 
-add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} )
+add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Files.h" "Files.cpp" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES}  )
 
 set_property(TARGET Pyewton PROPERTY CXX_STANDARD 20)
 

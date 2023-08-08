@@ -5,6 +5,7 @@ struct PointLight
 {
     vec3 position;
     vec3 color;
+    float strength;
 };
 
 out vec4 FragColor;
@@ -15,6 +16,7 @@ in vec3 FragPos;
 uniform vec3 objectColor;
 uniform bool isObjEmissive;
 uniform vec3 objLightColor;
+uniform float objLightStrength;
 
 uniform int nb_lights;
 uniform PointLight light_points[MAX_NUM_TOTAL_LIGHTS];
@@ -28,7 +30,7 @@ vec3 CalcPointLight(PointLight light){
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * light.color;
 
-    vec3 result = diffuse * objectColor;
+    vec3 result = diffuse * objectColor * light.strength;
  
     return result;
 }
@@ -36,9 +38,9 @@ vec3 CalcPointLight(PointLight light){
 void main()
 {    
     vec3 final_color;
+    final_color += ambient * objectColor;
     if(!isObjEmissive)
     {
-        final_color += ambient * objectColor;
 
         for(int i = 0; i < nb_lights; i++)
         {
@@ -47,7 +49,7 @@ void main()
     }
     else
     {
-        final_color = objLightColor;
+        final_color += objLightColor * objLightStrength;
     }
 
     

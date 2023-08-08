@@ -15,7 +15,7 @@ fs::path current_dir;
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
+ 
 // settings
 unsigned int SCR_WIDTH = 1200;
 unsigned int SCR_HEIGHT = 800;
@@ -36,7 +36,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 	glfwWindowHint(GLFW_SAMPLES, 4); //Antialiasing
 
-
+	 
 	// Create window with graphics context
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Pyewton Sandbox", NULL, NULL);
 	if (window == NULL)
@@ -56,29 +56,15 @@ int main()
 	glViewport(0, 0, screen_width, screen_height);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	Pyewton app;
+	Pyewton::Application app; 
 	app.Init(window, glsl_version);
 
 
 	while (!glfwWindowShouldClose(window)) {
 
-		Simulate(&(app.bodyList), 1.f / 60.f);
-
 		glfwPollEvents();
-
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		app.UpdateInputs();
-		app.UpdateTiming(); 
-
-		app.NewFrame();
-		app.UpdateUI(); 
 		
-		app.RenderScene();
-
-		app.RenderUI();
-		 
+		app.MainLoop();
 		
 		ImGuiIO& io = ImGui::GetIO();
 

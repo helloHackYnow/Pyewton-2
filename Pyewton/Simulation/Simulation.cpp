@@ -2,46 +2,53 @@
 
 
 
-void Simulate(std::vector<Body>* bodyList, float simulated_duration)
+void Simulate(std::vector<Body>& bodyList, float simulated_duration)
 {
-	std::vector<Body>& list = (*bodyList);
-	int nbBody = list.size();
+	int nbBody = bodyList.size();
 
 	for (int i = 0; i < nbBody; i++)
 	{
 		//Do other bodies affect the current one
-		if (list[i].isAffected)
+		if (bodyList[i].isAffected)
 		{
 			glm::vec3 attraction = glm::vec3(0, 0, 0);
 
 			for (int j = 0; j < nbBody; j++)
 			{
-				if (i != j && list[j].affectOther)
+				if (i != j && bodyList[j].affectOther)
 				{
-					glm::vec3 vec_ij = list[j].position - list[i].position;
+					glm::vec3 vec_ij = bodyList[j].position - bodyList[i].position;
 					float dst = vec_ij.length();
 
-					glm::vec3 attraction_local = vec_ij / dst;
+					glm::vec3 attraction_local = vec_ij;
 
-					attraction_local *= (list[i].mass * list[j].mass) / dst;
+					attraction_local *= (bodyList[i].mass * bodyList[j].mass) / (dst * dst);
 					attraction += attraction_local;
 				}
 			}
 
 			//Apply the attraction
-			list[i].velocity += (attraction * simulated_duration) / list[i].mass;
+			bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
 		}
 
 	}
 
 	for (int i = 0; i < nbBody; i++)
 	{
-		if (list[i].isAffected)
+		if (bodyList[i].isAffected)
 		{
 			//Update the position
 
-			list[i].position += list[i].velocity * simulated_duration;
-			list[i].orbit.AppendPoint(list[i].position);
+			bodyList[i].position += bodyList[i].velocity * simulated_duration;
+			bodyList[i].orbit.AppendPoint(bodyList[i].position);
 		}
+	}
+}
+
+void SimulateN(std::vector<Body>& bodyList, float simulated_duration, int N)
+{
+	for (int i = 0; i < N; i++)
+	{
+		Simulate(bodyList, simulated_duration);
 	}
 }

@@ -51,3 +51,8 @@ void Orbit::SetColor(Color color_)
 {
     orbitColor = color_;
 }
+
+void Orbit::Reset()
+{
+    vertexList.clear();
+}

@@ -8,47 +8,55 @@
 #include <imgui_impl_opengl3.h>
 #include <vector>
 #include <filesystem>
+#include "Simulation/Simulation.h"
 
-class Pyewton {
-public:
-	Pyewton();
-	void Init(GLFWwindow* window, const char* glsl_version);
-	void NewFrame();
-	virtual void UpdateUI();
-	void UpdateInputs();
-	void UpdateTiming();
-	void RenderUI();
-	void RenderScene();
-	void Shutdown();
+namespace Pyewton
+{
+	class Application {
+	public:
+		Application();
+		void Init(GLFWwindow* window, const char* glsl_version);
+		void MainLoop();
 
-public:
-	GLFWwindow* window;
-	Renderer renderer;
-	std::vector<Body> bodyList;
+		void NewFrame();
+		void UpdateUI();
+		void UpdateInputs();
+		void UpdateTiming();
+		void RenderUI();
+		void RenderScene();
+		void Shutdown();
 
-// All draw func
-private:
-	void DrawViewport();
-	void DrawBodyList();
-	void DrawSimulationSettings();
+	public:
+		GLFWwindow* window;
+		Odin::Renderer renderer;
+		std::vector<Body> bodyList;
 
-private:
+		// All draw func
+	private:
+		void DrawViewport();
+		void DrawBodyList();
+		void DrawSimulationControl();
+		void DrawSimulationSettings();
 
-	int render_width;
-	int render_height;
+	private:
 
-	// Is the user inputs are controlling the camera
-	bool isUsingCamera = false;
+		int render_width;
+		int render_height;
 
-	//Timing var 
-	float deltaTime;
-	float currentFrame;
-	float lastFrame;
+		// Is the user inputs are controlling the camera
+		bool isUsingCamera = false;
 
-	
+		//Timing var 
+		float deltaTime;
+		float currentFrame;
+		float lastFrame;
 
-//ui control
-private:
-	void setViewportFocus();
-};
+	private: //Simulation Control
+		bool isSimulationRunning;
 
+
+		//ui control
+	private:
+		void setViewportFocus();
+	};
+}

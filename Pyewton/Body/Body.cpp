@@ -49,7 +49,7 @@ void Body::setPos(float x, float y, float z)
 void Body::setLight(Color c, float strenght)
 {
 	light.color = c;
-	light.strenght = strenght;
+	light.strength = strenght;
 }
 
 glm::vec3 Body::getPos()
@@ -67,5 +67,11 @@ void Body::Draw(Shader shader)
 	shader.setVec3("objectColor", color);
 	shader.setBool("isObjEmissive", isEmissive);
 	shader.setVec3("objLightColor", light.color);
+	shader.setFloat("objLightStrength", light.strength);
 	model.Draw(shader);
+}
+
+void Body::ResetOrbit()
+{
+	orbit.Reset();
 }

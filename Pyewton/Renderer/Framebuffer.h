@@ -3,30 +3,42 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <glm/glm.hpp>
+#include "Texture.h"
 
-
-
-class FrameBuffer
+namespace Pyewton::Odin
 {
-public:
-	FrameBuffer();
-	~FrameBuffer();
+	struct FBOInfos
+	{
+		unsigned int samples;
+		glm::vec2 dimensions;
+		bool isHDR;
+	};
 
-	void Init(int _width, int _height, bool isHDR = false, int samples = 1);
-	void Rescale(int _width, int _height);
-	void Use();
+	class FrameBuffer
+	{
+	public:
+		FrameBuffer();
+		~FrameBuffer();
 
-	unsigned int GetTexture();
-	unsigned int ID();
+		void Init(int _width, int _height, bool isHDR = false, int samples = 1);
+		void Rescale(int _width, int _height);
+		void Use();
 
-	bool IsMultiSamples();
+		unsigned int GetTexture();
+		unsigned int ID();
 
+		bool IsMultiSamples();
 
-private:
-	unsigned int fboID;
-	unsigned int texID;
-	unsigned int rboID;
+	private:
+		glm::vec2 dimensions;
 
-	int samples;
+		Texture texture;
 
-};
+		unsigned int fboID;
+		unsigned int rboID;
+
+		int samples;
+
+	};
+}

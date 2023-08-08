@@ -1,33 +1,13 @@
-#version 450 core
+#version 450 core 
 
 out vec4 FragColor;
   
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
+uniform vec2 blur_dir;
 
 const int SAMPLE_COUNT = 11;
-
-
-vec4 UpsampleTent(in sampler2D sourceTexture, vec2 uv, vec2 texelSize, vec4 sampleScale)
-{
-    vec4 d = texelSize.xyxy * vec4(1.0, 1.0, -1.0, 0.0) * sampleScale;
-
-    vec4 s;
-    s =  texture(sourceTexture, uv - d.xy);
-    s += texture(sourceTexture, uv - d.wy) * 2.0;
-    s += texture(sourceTexture, uv - d.zy);
-
-    s += texture(sourceTexture, uv + d.zw) * 2.0;
-    s += texture(sourceTexture, uv       ) * 4.0;
-    s += texture(sourceTexture, uv + d.xw) * 2.0;
-
-    s =  texture(sourceTexture, uv + d.zy);
-    s += texture(sourceTexture, uv + d.wy) * 2.0;
-    s += texture(sourceTexture, uv + d.xy);
-
-    return s * (1.0 / 16.0);
-}
 
 const float OFFSETS[11] = float[11](
     -9.260003189282239,
@@ -77,5 +57,5 @@ vec4 blur(in sampler2D sourceTexture, vec2 blurDirection, vec2 pixelCoord)
 
 void main()
 { 
-    FragColor = blur(screenTexture, vec2(1, 0), TexCoords);
+    FragColor = blur(screenTexture, blur_dir, TexCoords);
 }

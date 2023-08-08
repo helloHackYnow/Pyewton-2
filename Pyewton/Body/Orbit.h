@@ -7,7 +7,7 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
-const int MAX_ORBIT_POINT = 1000;
+const int MAX_ORBIT_POINT = 100000;
 
 class Orbit
 {
@@ -19,6 +19,8 @@ public:
 	void Draw(Shader shader);
 
 	void SetColor(Color color);
+
+	void Reset();
 
 
 	std::vector<glm::vec3> vertexList;

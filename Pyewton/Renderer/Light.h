@@ -5,5 +5,5 @@
 struct PointLight {
 	glm::vec3 position;
 	Color color;
-	float strenght;
+	float strength;
 };
