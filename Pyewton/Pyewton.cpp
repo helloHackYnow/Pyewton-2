@@ -4,6 +4,8 @@
 #include "imgui_stdlib.h"
 #include "Files.h"
 
+#define MULTITHREADING 0
+
 namespace fs = std::filesystem;
 
 namespace Pyewton
@@ -63,7 +65,7 @@ namespace Pyewton
 		sphere3.isEmissive = true;
 		sphere3.setLight(Color(1, 1, 1), 5);
 		sphere3.name = std::string("Light");
-
+		 
 		bodyList.push_back(sphere1);
 		bodyList.push_back(sphere2);
 		bodyList.push_back(sphere3);
@@ -79,6 +81,12 @@ namespace Pyewton
 
 		//window pointer 
 		window = window_;
+
+#ifdef MULTITHREADING
+		simulationWorker = Frigg::LaunchSimulationThread(Frigg::Simulate, &bodyList, 1.f/60.f, -1, &bodyList_access);
+
+#endif // MULTITHREADING
+
 	}
 
 	void Application::MainLoop()
@@ -87,7 +95,11 @@ namespace Pyewton
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		if(isSimulationRunning) Simulate(bodyList, 1.f / 60.f);
+
+#ifndef MULTITHREADING
+		if(isSimulationRunning) Frigg::Simulate(&bodyList, 1.f / 60.f);
+#endif // !MULTITHREADING
+
 
 		UpdateInputs();
 		UpdateTiming();
@@ -121,6 +133,8 @@ namespace Pyewton
 		DrawSimulationSettings();
 
 		DrawSimulationControl();
+
+		DrawCameraParameters();
 	}
 
 	void Application::UpdateInputs()
@@ -161,9 +175,11 @@ namespace Pyewton
 		//Keyboard input
 		static float lastTABpress = 0;
 		const float tabCooldown = 0.5f;
-
+		
+		/*
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
+		*/
 
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			renderer.camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -210,7 +226,7 @@ namespace Pyewton
 
 	void Application::RenderScene()
 	{
-		renderer.Render(bodyList);
+		renderer.Render(bodyList, &bodyList_access);
 	}
 
 	void Application::Shutdown() {
@@ -251,6 +267,9 @@ namespace Pyewton
 			{
 				ImGui::DragFloat3("position", &body.position[0]);
 
+				ImGui::SeparatorText("orbit");
+				ImGui::Text(std::string(std::to_string(body.orbit.vertexList.size())).data());
+
 				ImGui::SeparatorText("Material");
 				ImGui::Checkbox("isEmissive", &body.isEmissive);
 				ImGui::BeginDisabled(!body.isEmissive);
@@ -289,10 +308,12 @@ namespace Pyewton
 
 		if (ImGui::Button("Reset Orbits"))
 		{
+			bodyList_access.lock();
 			for (auto& body : bodyList)
 			{
 				body.ResetOrbit();
 			}
+			bodyList_access.unlock();
 		}
 		ImGui::End();
 	}
@@ -320,6 +341,16 @@ namespace Pyewton
 			ImGui::PopStyleVar();
 		}
 
+		ImGui::End();
+	}
+
+	void Application::DrawCameraParameters()
+	{
+		if (ImGui::Begin("Camera"))
+		{
+			ImGui::DragFloat("Speed", &renderer.camera.MovementSpeed, 0.1);
+			ImGui::DragFloat("FOV", &renderer.camera.Zoom, 0.1f, 1, 120);
+		}
 		ImGui::End();
 	}
 

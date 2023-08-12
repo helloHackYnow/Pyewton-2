@@ -31,12 +31,15 @@ namespace Pyewton
 		Odin::Renderer renderer;
 		std::vector<Body> bodyList;
 
+		std::mutex bodyList_access;
+
 		// All draw func
 	private:
 		void DrawViewport();
 		void DrawBodyList();
 		void DrawSimulationControl();
 		void DrawSimulationSettings();
+		void DrawCameraParameters();
 
 	private:
 
@@ -53,6 +56,7 @@ namespace Pyewton
 
 	private: //Simulation Control
 		bool isSimulationRunning;
+		std::thread simulationWorker;
 
 
 		//ui control

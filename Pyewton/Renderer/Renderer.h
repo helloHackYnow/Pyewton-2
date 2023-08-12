@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include "Framebuffer.h"
 #include "../Body/Body.h"
+#include "../Simulation/Simulation.h"
 #include "Camera.h"
 #include "Shader/Graphics.h"
 #include "Shader/Compute.h"
@@ -27,7 +28,7 @@ namespace Pyewton::Odin
 		int AddShader(const char* vertex_path, const char* fragment_path);
 		void SetShaderFlag(int shaderIndex, ShaderFlags flag);
 
-		void Render(std::vector<Body>& bodyList);
+		void Render(std::vector<Body>& bodyList, std::mutex* mutex);
 
 		void setViewport(int width, int height);
 

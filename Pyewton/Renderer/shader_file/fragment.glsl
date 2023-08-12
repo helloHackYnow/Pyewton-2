@@ -26,9 +26,10 @@ uniform vec3 ambient;
 vec3 CalcPointLight(PointLight light){
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
+    float dst = length(light.position - FragPos);
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * light.color;
+    vec3 diffuse = diff * light.color / dst;
 
     vec3 result = diffuse * objectColor * light.strength;
  
@@ -51,8 +52,6 @@ void main()
     {
         final_color += objLightColor * objLightStrength;
     }
-
-    
 
     FragColor = vec4(final_color, 1.0);
 }

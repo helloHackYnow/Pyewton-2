@@ -1,54 +1,84 @@
 #include "Simulation.h"
 
-
-
-void Simulate(std::vector<Body>& bodyList, float simulated_duration)
+namespace Pyewton::Frigg
 {
-	int nbBody = bodyList.size();
+	using namespace std::chrono_literals;
 
-	for (int i = 0; i < nbBody; i++)
+	void Simulate(std::vector<Body>* bodyList_, float simulated_duration)
 	{
-		//Do other bodies affect the current one
-		if (bodyList[i].isAffected)
+		std::vector<Body> & bodyList = *bodyList_;
+
+		int nbBody = bodyList.size();
+
+		for (int i = 0; i < nbBody; i++)
 		{
-			glm::vec3 attraction = glm::vec3(0, 0, 0);
-
-			for (int j = 0; j < nbBody; j++)
+			//Do other bodies affect the current one
+			if (bodyList[i].isAffected)
 			{
-				if (i != j && bodyList[j].affectOther)
+				glm::vec3 attraction = glm::vec3(0, 0, 0);
+
+				for (int j = 0; j < nbBody; j++)
 				{
-					glm::vec3 vec_ij = bodyList[j].position - bodyList[i].position;
-					float dst = vec_ij.length();
+					if (i != j && bodyList[j].affectOther)
+					{
+						glm::vec3 vec_ij = bodyList[j].position - bodyList[i].position;
+						float dst = vec_ij.length();
 
-					glm::vec3 attraction_local = vec_ij;
+						glm::vec3 attraction_local = vec_ij;
 
-					attraction_local *= (bodyList[i].mass * bodyList[j].mass) / (dst * dst);
-					attraction += attraction_local;
+						attraction_local *= (bodyList[i].mass * bodyList[j].mass) / (dst * dst);
+						attraction += attraction_local;
+					}
 				}
+
+				//Apply the attraction
+				bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
 			}
 
-			//Apply the attraction
-			bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
 		}
 
-	}
-
-	for (int i = 0; i < nbBody; i++)
-	{
-		if (bodyList[i].isAffected)
+		for (int i = 0; i < nbBody; i++)
 		{
-			//Update the position
+			if (bodyList[i].isAffected)
+			{
+				//Update the position
 
-			bodyList[i].position += bodyList[i].velocity * simulated_duration;
-			bodyList[i].orbit.AppendPoint(bodyList[i].position);
+				bodyList[i].position += bodyList[i].velocity * simulated_duration;
+				bodyList[i].orbit.AppendPoint(bodyList[i].position);
+			}
 		}
 	}
-}
 
-void SimulateN(std::vector<Body>& bodyList, float simulated_duration, int N)
-{
-	for (int i = 0; i < N; i++)
+	void SimulateN(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, int N, std::mutex* bodyList_access)
 	{
-		Simulate(bodyList, simulated_duration);
+		for (int i = 0; i < N; i++)
+		{
+			(*bodyList_access).lock();
+
+			simulate(bodyList, simulated_duration);
+
+			(*bodyList_access).unlock();
+		}
 	}
+
+	void SimulateLoop(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, std::mutex* bodyList_access)
+	{
+		while (true)
+		{
+			(*bodyList_access).lock();
+
+			simulate(bodyList, simulated_duration);
+
+			(*bodyList_access).unlock();
+
+			std::this_thread::sleep_for(0.0005ms);
+		}
+	}
+
+	std::thread LaunchSimulationThread(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, int N, std::mutex* bodyList_access)
+	{
+		std::thread simulationWorker(SimulateLoop, simulate, bodyList, simulated_duration, bodyList_access);
+		return simulationWorker;
+	}
+
 }

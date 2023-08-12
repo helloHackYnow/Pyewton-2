@@ -29,7 +29,7 @@ namespace Pyewton::Odin
 		if (infos.isMultisample)
 		{
 			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texID);
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, infos.samples, infos.format, _width, _height, GL_TRUE);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, infos.samples, infos.format, _width, _height, GL_FALSE);
 		}
 		else
 		{
@@ -44,8 +44,17 @@ namespace Pyewton::Odin
 
 	void Texture::Resize(int _width, int _height)
 	{
-		glBindTexture(infos.target, texID);
-		glTexImage2D(infos.target, 0, infos.format, _width, _height, 0, infos.internalFormat, GL_FLOAT, nullptr);
+		if (infos.isMultisample)
+		{
+			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texID);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, infos.samples, infos.format, _width, _height, GL_FALSE);
+		}
+		else
+		{
+			glBindTexture(infos.target, texID);
+			glTexImage2D(infos.target, 0, infos.format, _width, _height, 0, infos.internalFormat, GL_FLOAT, nullptr);
+		}
+		
 
 		infos.dimensions = glm::vec2(_width, _height);
 		glBindTexture(infos.target, 0); // Cleanup

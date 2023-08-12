@@ -48,7 +48,7 @@ namespace Pyewton::Odin
 
 
 
-	void Renderer::Render(std::vector<Body>& bodyList)
+	void Renderer::Render(std::vector<Body>& bodyList, std::mutex* mutex)
 	{
 		glEnable(GL_MULTISAMPLE);
 
@@ -59,6 +59,8 @@ namespace Pyewton::Odin
 
 		glClearColor(ambientLight.getColor()[0] / 2, ambientLight.getColor()[1] / 2, ambientLight.getColor()[2] / 2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		(*mutex).lock();
 
 		UpdateLights(bodyList);
 		UpdateShaders();
@@ -76,6 +78,8 @@ namespace Pyewton::Odin
 			body.orbit.SetColor(body.color);
 			body.orbit.Draw(*shaderList.at(orbitShader).get());
 		}
+
+		(*mutex).unlock();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
