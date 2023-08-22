@@ -7,7 +7,7 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
-const int MAX_ORBIT_POINT = 100000;
+const int MAX_ORBIT_POINT = 10000;
 
 class Orbit
 {

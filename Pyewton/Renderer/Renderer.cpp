@@ -60,7 +60,7 @@ namespace Pyewton::Odin
 		glClearColor(ambientLight.getColor()[0] / 2, ambientLight.getColor()[1] / 2, ambientLight.getColor()[2] / 2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		(*mutex).lock();
+		if (mutex != nullptr) (*mutex).lock();
 
 		UpdateLights(bodyList);
 		UpdateShaders();
@@ -79,20 +79,20 @@ namespace Pyewton::Odin
 			body.orbit.Draw(*shaderList.at(orbitShader).get());
 		}
 
-		(*mutex).unlock();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if (mutex != nullptr) (*mutex).unlock();
 
 		//Copy fbo_internal to postProcess
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_internal.ID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_postProcess.ID());
+
+		if (postprocesingEnable) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_postProcess.ID());
+		else glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_output.ID());
 
 		glBlitFramebuffer(0, 0, viewport_width, viewport_height, 0, 0, viewport_width, viewport_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); // Unbin fbo
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		bloom.Apply(fbo_postProcess, fbo_output, viewport_width, viewport_height);
+		if(postprocesingEnable) bloom.Apply(fbo_postProcess, fbo_output, viewport_width, viewport_height);
 	}
 
 
@@ -170,7 +170,7 @@ namespace Pyewton::Odin
 	{
 		//Update light point
 		lightPointList.clear();
-		for (auto body : bodyList)
+		for (auto &body : bodyList)
 		{
 			if (body.isEmissive)
 			{

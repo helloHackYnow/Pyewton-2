@@ -28,7 +28,7 @@ namespace Pyewton::Odin
 		int AddShader(const char* vertex_path, const char* fragment_path);
 		void SetShaderFlag(int shaderIndex, ShaderFlags flag);
 
-		void Render(std::vector<Body>& bodyList, std::mutex* mutex);
+		void Render(std::vector<Body>& bodyList, std::mutex* mutex = nullptr);
 
 		void setViewport(int width, int height);
 
@@ -51,6 +51,8 @@ namespace Pyewton::Odin
 		//List of pointers to the different shader
 		std::vector<std::unique_ptr<Shader>> shaderList;
 		Bloom bloom;
+
+		bool postprocesingEnable = true;
 	private:
 		void UpdateLights(std::vector<Body>& bodyList);
 

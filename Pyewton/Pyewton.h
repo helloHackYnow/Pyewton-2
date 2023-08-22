@@ -8,7 +8,12 @@
 #include <imgui_impl_opengl3.h>
 #include <vector>
 #include <filesystem>
+#include "Simulation/replay.h"
 #include "Simulation/Simulation.h"
+#include "Simulation/Precompute/Precompute.h"
+#include "A3rdParty/imgui-notify/imgui_notify.h"
+#include "A3rdParty/Fonts/tahoma.h"
+#include <format>
 
 namespace Pyewton
 {
@@ -22,6 +27,7 @@ namespace Pyewton
 		void UpdateUI();
 		void UpdateInputs();
 		void UpdateTiming();
+		void UpdateReplay();
 		void RenderUI();
 		void RenderScene();
 		void Shutdown();
@@ -33,6 +39,8 @@ namespace Pyewton
 
 		std::mutex bodyList_access;
 
+		int nb_iterations;
+
 		// All draw func
 	private:
 		void DrawViewport();
@@ -40,6 +48,10 @@ namespace Pyewton
 		void DrawSimulationControl();
 		void DrawSimulationSettings();
 		void DrawCameraParameters();
+		void DrawMultithreadingDebug();
+		void DrawPrecomputeDebug();
+		void DrawPrecomputePlayer();
+		void DrawNotifications();
 
 	private:
 
@@ -56,8 +68,16 @@ namespace Pyewton
 
 	private: //Simulation Control
 		bool isSimulationRunning;
-		std::thread simulationWorker;
+		Frigg::Simulator simulation;
+		
+		//Hold all the simulations holders pointers
+		std::vector<std::unique_ptr<Frigg::SystemStateHolder>> holders;
+		
 
+		Frigg::Player player;
+		bool isReplaying = false;
+		bool isHolderLoaded = false;
+		int loadedHolderIndex;
 
 		//ui control
 	private:

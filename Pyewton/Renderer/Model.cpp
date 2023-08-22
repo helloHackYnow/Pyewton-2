@@ -25,7 +25,6 @@ void Model::loadModel(string path)
             cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
             return;
         }
-        cout << "scene importt check" << endl;
         directory = path.substr(0, path.find_last_of('/'));
 
         processNode(scene->mRootNode, scene);

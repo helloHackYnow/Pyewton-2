@@ -21,9 +21,9 @@ namespace Pyewton
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		ImGuiIO* io = &ImGui::GetIO();
+		io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 
 		// Setup Platform/Renderer bindings
@@ -83,9 +83,18 @@ namespace Pyewton
 		window = window_;
 
 #ifdef MULTITHREADING
-		simulationWorker = Frigg::LaunchSimulationThread(Frigg::Simulate, &bodyList, 1.f/60.f, -1, &bodyList_access);
+		simulation.SetModel(Frigg::Simulate);
+		//simulation.Start(&bodyList, 1.f/60.f);
 
 #endif // MULTITHREADING
+
+		//Fonts
+		ImFontConfig fontCfg;
+		fontCfg.FontDataOwnedByAtlas = false;
+		io->Fonts->AddFontFromMemoryTTF((void*)tahoma, sizeof(tahoma), 17.f, &fontCfg);
+
+		// Init notifications
+		ImGui::MergeIconsWithLatestFont(16.f, false);
 
 	}
 
@@ -106,7 +115,8 @@ namespace Pyewton
 
 		NewFrame();
 		UpdateUI();
-
+		
+		UpdateReplay();
 		RenderScene();
 
 		RenderUI();
@@ -135,6 +145,14 @@ namespace Pyewton
 		DrawSimulationControl();
 
 		DrawCameraParameters();
+
+		DrawMultithreadingDebug();
+
+		DrawPrecomputeDebug();
+
+		DrawPrecomputePlayer();
+
+		DrawNotifications();
 	}
 
 	void Application::UpdateInputs()
@@ -218,15 +236,27 @@ namespace Pyewton
 		lastFrame = currentFrame;
 	}
 
+	void Application::UpdateReplay()
+	{
+		if (isReplaying)
+		{
+			player.Next();
+		}
+	}
+
 	void Application::RenderUI() {
+
 		// Render dear imgui into screen
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		
 	}
 
 	void Application::RenderScene()
 	{
-		renderer.Render(bodyList, &bodyList_access);
+		if (isReplaying) renderer.Render(player.displayBodyList);
+		else renderer.Render(bodyList, &bodyList_access);
 	}
 
 	void Application::Shutdown() {
@@ -278,7 +308,7 @@ namespace Pyewton
 				ImGui::EndDisabled();
 
 				ImGui::SeparatorText("Simulation");
-				ImGui::DragFloat("Mass", &body.mass, 0.1f, 0.f, 100.f);
+				ImGui::DragFloat("Mass", &body.mass, 0.1f, 0.f, 10000.f);
 				ImGui::Checkbox("Is affected", &body.isAffected);
 				ImGui::Checkbox("Affect other", &body.affectOther);
 
@@ -332,12 +362,9 @@ namespace Pyewton
 
 			ImGui::EndChild();
 			ImGui::SameLine();
-			ImGui::BeginChild("ChildR2", ImVec2(300, 0), true, window_flags);
+			
+			ImGui::Checkbox("Postprocessing", &renderer.postprocesingEnable);
 
-			ImGui::SeparatorText("Bloom");
-			ImGui::DragFloat("knee", &renderer.bloom.knee, 0.05f);
-			ImGui::DragFloat("threshold", &renderer.bloom.threshold, 0.05f);
-			ImGui::EndChild();
 			ImGui::PopStyleVar();
 		}
 
@@ -353,6 +380,144 @@ namespace Pyewton
 		}
 		ImGui::End();
 	}
+
+	void Application::DrawMultithreadingDebug()
+	{
+		static auto begining = std::chrono::steady_clock::now();
+		static int lastPassnb = 0;
+		static std::vector<float> nbPass;
+		static int pushControl = 0;
+
+		auto current = std::chrono::steady_clock::now();
+		auto sinceFirst = std::chrono::duration_cast<std::chrono::seconds>(current - begining);
+
+		simulation.infos.mutex.lock();
+
+		pushControl = (pushControl + 1) % 60;
+		if (pushControl == 0)
+		{
+
+			nbPass.push_back(simulation.infos.nbIterations);
+		}
+
+		//float passPerSec_average = simulation.infos.nbIterations / sinceFirst.count();
+		//passPerSec_average /= pow(10, 9); // Convert from nanoseconds to seconds
+
+		float passPerSec_average = simulation.infos.nbIterations / (sinceFirst.count() + 1);
+		//passPerSec_current /= pow(10, 9); // Convert from nanoseconds to seconds
+
+		lastPassnb = simulation.infos.nbIterations;
+		if (ImGui::Begin("Multithreading"))
+		{
+			ImGui::BeginDisabled(simulation.infos.isSimulationRunning);
+			if (ImGui::Button("start sim"))
+			{
+				simulation.Start(&bodyList, 1.f/60.f);
+			}
+			ImGui::EndDisabled();
+			ImGui::SameLine();
+			ImGui::BeginDisabled(!simulation.infos.isSimulationRunning);
+			if (ImGui::Button("stop sim"))
+			{
+				simulation.Stop();
+			}
+			ImGui::EndDisabled();
+
+			ImGui::DragInt("SimPerBatch", &simulation.infos.simulationPerBatch);
+			ImGui::DragInt("ns between batchs", (int*)&simulation.infos.durationBtwBatch, 1.f, 250, 25000);
+			ImGui::Text("pass per sec : %.0f", passPerSec_average);
+			ImGui::PlotLines("", nbPass.data(), nbPass.size(), 0, (const char*)0, FLT_MAX, FLT_MAX, ImVec2(0, 200));
+			ImGui::End();
+		}
+		simulation.infos.mutex.unlock();
+		
+	}
+
+	void Application::DrawPrecomputeDebug()
+	{
+		
+
+
+		if (ImGui::Begin("Precompute"))
+		{
+			if (ImGui::Button("Precompute - start"))
+			{
+				auto holder_ = simulation.Precompute(bodyList, 1.0f / 60.f, 10000);
+				holders.push_back(std::move(holder_));
+				ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Hello World! This is a success! %s", "We can also format here:)" });
+			}
+
+			int i = 0;
+			for (auto& holder : holders)
+			{
+				if (ImGui::TreeNode(std::to_string(i).data()))
+				{
+					ImGui::Text("Size : %d", holder.get()->size);
+					ImGui::Text("Simulated : %d", holder.get()->back_state);
+
+					if (ImGui::Button("Load in player"))
+					{
+						player.SetHolder(holder.get());
+						player.SetBodyList(bodyList);
+						isHolderLoaded = true;
+						loadedHolderIndex = i;
+					}
+
+					ImGui::BeginDisabled(isReplaying);
+					if (ImGui::Button("Delete"))
+					{
+						holders.erase(holders.begin() + i);
+					}
+					ImGui::EndDisabled();
+
+					ImGui::TreePop();
+				}
+
+				i++;
+			}
+
+			ImGui::End();
+		}
+	}
+
+	void Application::DrawPrecomputePlayer()
+	{
+		char buf[128];
+		const char* title_{ isHolderLoaded ? "Player - %d###Player" : "Player###Player" };
+		sprintf(buf, title_, loadedHolderIndex);
+
+		if (ImGui::Begin(buf))
+		{
+			if (ImGui::ArrowButton("#play", ImGuiDir_Right))
+			{
+				isReplaying = !isReplaying;
+				player.ResetReplayPos();
+			}
+			ImGui::SameLine();
+
+			if (isReplaying) ImGui::Text("Playing ...");
+			else ImGui::Text("Stoped");
+
+			if (isReplaying)
+			{
+				ImGui::Text("%d", player.replayPos); 
+			}
+
+			ImGui::DragFloat("Speed", &player.replaySpeed, 0.1f, 1.f, 10.f);
+
+			ImGui::End();
+		}
+	}
+
+	void Application::DrawNotifications()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f); // Round borders
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 100.f / 255.f)); // Background color
+		ImGui::RenderNotifications(); // <-- Here we render all notifications
+		ImGui::PopStyleVar(1); // Don't forget to Pop()
+		ImGui::PopStyleColor(1);
+	}
+
 
 
 

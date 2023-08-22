@@ -24,6 +24,8 @@ public:
 
 	void Draw(Shader shader);
 
+	void UpdateOrbit();
+
 	void ResetOrbit();
 
 	glm::vec3 getPos();

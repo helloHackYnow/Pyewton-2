@@ -71,6 +71,11 @@ void Body::Draw(Shader shader)
 	model.Draw(shader);
 }
 
+void Body::UpdateOrbit()
+{
+	orbit.AppendPoint(position);
+}
+
 void Body::ResetOrbit()
 {
 	orbit.Reset();

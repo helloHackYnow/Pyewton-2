@@ -10,32 +10,35 @@ namespace Pyewton::Frigg
 
 		int nbBody = bodyList.size();
 
-		for (int i = 0; i < nbBody; i++)
-		{
-			//Do other bodies affect the current one
-			if (bodyList[i].isAffected)
+		int i = 0;
+		std::for_each(std::execution::unseq, bodyList.begin(), bodyList.end(),
+			[&i, &bodyList, nbBody, simulated_duration](Body& body)
 			{
-				glm::vec3 attraction = glm::vec3(0, 0, 0);
-
-				for (int j = 0; j < nbBody; j++)
+				//Do other bodies affect the current one
+				if (body.isAffected)
 				{
-					if (i != j && bodyList[j].affectOther)
+					glm::vec3 attraction = glm::vec3(0, 0, 0);
+
+					for (int j = 0; j < nbBody; j++)
 					{
-						glm::vec3 vec_ij = bodyList[j].position - bodyList[i].position;
-						float dst = vec_ij.length();
+						if (i != j && bodyList[j].affectOther)
+						{
+							glm::vec3 vec_ij = bodyList[j].position - body.position;
+							float dst = vec_ij.length();
 
-						glm::vec3 attraction_local = vec_ij;
+							glm::vec3 attraction_local = vec_ij;
 
-						attraction_local *= (bodyList[i].mass * bodyList[j].mass) / (dst * dst);
-						attraction += attraction_local;
+							attraction_local *= (body.mass * bodyList[j].mass) / (dst * dst);
+							attraction += attraction_local;
+						}
 					}
+
+					//Apply the attraction
+					bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
 				}
+				i++;
+			});
 
-				//Apply the attraction
-				bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
-			}
-
-		}
 
 		for (int i = 0; i < nbBody; i++)
 		{
@@ -44,41 +47,74 @@ namespace Pyewton::Frigg
 				//Update the position
 
 				bodyList[i].position += bodyList[i].velocity * simulated_duration;
-				bodyList[i].orbit.AppendPoint(bodyList[i].position);
+				bodyList[i].UpdateOrbit();
 			}
 		}
 	}
 
-	void SimulateN(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, int N, std::mutex* bodyList_access)
+
+	void SimulateLoop(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, std::mutex* mutex, SimulationInfos* infos)
 	{
+		using namespace std::chrono;
+
+		while (infos->isSimulationRunning)
+		{
+			infos->mutex.lock();
+			int simPerBatch = infos->simulationPerBatch;
+			nanoseconds dur = infos->durationBtwBatch;
+
+			(infos->nbIterations) += simPerBatch;
+			infos->mutex.unlock();
+
+			for (int i = 0; i < simPerBatch; i++)
+			{
+				mutex->lock();
+				simulate(bodyList, simulated_duration);
+				mutex->unlock();
+			}
+
+			std::this_thread::sleep_for(dur);
+		}
+	}
+
+	void Simulator::SetModel(SimulationFunction func)
+	{
+		simulationModel = Frigg::Simulate;
+	}
+
+	std::unique_ptr<SystemStateHolder> Simulator::Precompute(std::vector<Body> bodyList, float simulated_duration, int N)
+	{
+		std::vector<Body> myBodyList = bodyList;
+
+		SystemStateHolder* ptr = new SystemStateHolder(myBodyList.size(), N, simulated_duration);
+
 		for (int i = 0; i < N; i++)
 		{
-			(*bodyList_access).lock();
-
-			simulate(bodyList, simulated_duration);
-
-			(*bodyList_access).unlock();
+			Frigg::Simulate(&myBodyList, simulated_duration);
+			ptr->AddState(&myBodyList);
 		}
+
+		std::unique_ptr<SystemStateHolder> ptr_(ptr);
+
+		return ptr_;
 	}
 
-	void SimulateLoop(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, std::mutex* bodyList_access)
+	void Simulator::Start(std::vector<Body>* bodyList, float simulated_duration)
 	{
-		while (true)
+		std::cout << "Starting simualtion thread ...\n";
+		if (!infos.isSimulationRunning)
 		{
-			(*bodyList_access).lock();
-
-			simulate(bodyList, simulated_duration);
-
-			(*bodyList_access).unlock();
-
-			std::this_thread::sleep_for(0.0005ms);
+			infos.isSimulationRunning = true;
+			this->simulationWorker = std::thread(Frigg::SimulateLoop, simulationModel, bodyList, simulated_duration, &mutex, &infos);
 		}
 	}
 
-	std::thread LaunchSimulationThread(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, int N, std::mutex* bodyList_access)
+	void Simulator::Stop()
 	{
-		std::thread simulationWorker(SimulateLoop, simulate, bodyList, simulated_duration, bodyList_access);
-		return simulationWorker;
+		if (infos.isSimulationRunning)
+		{
+			infos.isSimulationRunning = false;
+			simulationWorker.join();
+		}	
 	}
-
 }

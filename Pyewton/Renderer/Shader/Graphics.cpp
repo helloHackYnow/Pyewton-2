@@ -18,7 +18,6 @@ GShader::GShader(const char* vertexPath, const char* fragmentPath)
     // ensure ifstream objects can throw exceptions:
     vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    std::cout << vertexPath << '\n';
     try
     {
         // open files
@@ -33,7 +32,6 @@ GShader::GShader(const char* vertexPath, const char* fragmentPath)
         fShaderFile.close();
         // convert stream into string
         vertexCode = vShaderStream.str();
-        std::cout << vertexCode << '\n';
         fragmentCode = fShaderStream.str();
     }
     catch (std::ifstream::failure& e)

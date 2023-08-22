@@ -28,7 +28,12 @@ file(GLOB_RECURSE 3D_FILES
 	CONFIGURE_DEPENDS
 	*.obj)
 
-add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Files.h" "Files.cpp" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES}  )
+file(GLOB_RECURSE 3RD_PARTY
+	CMAKE_CONFIGURE_DEPENDS
+	A3rdParty/*.h
+	A3rdParty/*.cpp)
+
+add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Files.h" "Files.cpp" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} ${3RD_PARTY} )
 
 set_property(TARGET Pyewton PROPERTY CXX_STANDARD 20)
 
