@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Shader/Graphics.h"
 #include "Shader/Compute.h"
+#include "Grid.h"
  
 #include "PostProcessing/PostProcessor.h"
 #include "PostProcessing/Effects/Bloom/Bloom.h"
@@ -42,11 +43,16 @@ namespace Pyewton::Odin
 		//Simulation
 		Color ambientLight = Color(0.2);
 
+		float exposure = 1.f;
+
 		//Index of the main shader in the shader list
 		int mainShader;
 
 		//Index of the orbit shader in the shader list
 		int orbitShader;
+
+		//Index of the gridShader shader in the shader list
+		int gridShader;
 
 		//List of pointers to the different shader
 		std::vector<std::unique_ptr<Shader>> shaderList;
@@ -59,7 +65,6 @@ namespace Pyewton::Odin
 	private:
 		PostProcessor postProcessor;
 
-
 		FrameBuffer fbo_internal;
 		FrameBuffer fbo_postProcess;
 		FrameBuffer fbo_output;
@@ -71,6 +76,8 @@ namespace Pyewton::Odin
 
 		int viewport_width;
 		int viewport_height;
+
+		Grid grid;
 	};
 
 }

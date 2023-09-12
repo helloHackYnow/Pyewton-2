@@ -10,17 +10,21 @@
 #include <filesystem>
 #include "Simulation/replay.h"
 #include "Simulation/Simulation.h"
-#include "Simulation/Precompute/Precompute.h"
 #include "A3rdParty/imgui-notify/imgui_notify.h"
 #include "A3rdParty/Fonts/tahoma.h"
 #include <format>
+#include "SubApps/Viewport/Viewport.h"
+#include "AppData.h"
 
 namespace Pyewton
 {
+	
+
 	class Application {
 	public:
 		Application();
 		void Init(GLFWwindow* window, const char* glsl_version);
+		void InitSubApps();
 		void MainLoop();
 
 		void NewFrame();
@@ -32,52 +36,35 @@ namespace Pyewton
 		void RenderScene();
 		void Shutdown();
 
-	public:
-		GLFWwindow* window;
-		Odin::Renderer renderer;
-		std::vector<Body> bodyList;
-
-		std::mutex bodyList_access;
-
-		int nb_iterations;
-
 		// All draw func
 	private:
+		void DrawSubApps();
+
 		void DrawViewport();
 		void DrawBodyList();
-		void DrawSimulationControl();
 		void DrawSimulationSettings();
 		void DrawCameraParameters();
-		void DrawMultithreadingDebug();
 		void DrawPrecomputeDebug();
 		void DrawPrecomputePlayer();
 		void DrawNotifications();
+		void DrawMenu();
+
+		void SyncBodyLists();
+
+	public:
+
+		AppData data;
+		std::vector<SubApp> subApps;
 
 	private:
 
-		int render_width;
-		int render_height;
-
-		// Is the user inputs are controlling the camera
-		bool isUsingCamera = false;
-
-		//Timing var 
-		float deltaTime;
-		float currentFrame;
-		float lastFrame;
-
-	private: //Simulation Control
-		bool isSimulationRunning;
-		Frigg::Simulator simulation;
-		
-		//Hold all the simulations holders pointers
-		std::vector<std::unique_ptr<Frigg::SystemStateHolder>> holders;
-		
-
-		Frigg::Player player;
-		bool isReplaying = false;
-		bool isHolderLoaded = false;
-		int loadedHolderIndex;
+		// Window manager
+		bool show_viewport				= true;
+		bool show_bodylist				= true;
+		bool show_simulationControl		= true;
+		bool show_cameraParameters		= true;
+		bool show_precomputeDebug		= true;
+		bool show_precomputePlayer		= true;
 
 		//ui control
 	private:

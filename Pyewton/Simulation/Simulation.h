@@ -3,7 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "../Body/Body.h"
-#include "Precompute/Precompute.h"
+#include "replay.h"
+#include "../A3rdParty/imgui-notify/imgui_notify.h"
 #include <iostream>
 #include <format>
 #include <thread>
@@ -12,10 +13,9 @@
 #include <execution>
 #include <future>
 
-
 namespace Pyewton::Frigg
 {
-
+	class SimulationHolder;
 
 	using namespace std::chrono;
 	using namespace std::chrono_literals;
@@ -42,11 +42,11 @@ namespace Pyewton::Frigg
 
 	
 
-	typedef void(*SimulationFunction)(std::vector<Body>*, float);
+	typedef void(*SimulationFunction)(BodyList*, float, bool);
 
-	void Simulate(std::vector<Body>* bodyList, float simulated_duration);
+	void Simulate(BodyList* bodyList, float simulated_duration, bool update_orbit = false);
 
-	void SimulateLoop(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, std::mutex* mutex, SimulationInfos* infos);
+	void SimulateLoop(SimulationFunction simulate, BodyList* bodyList, float simulated_duration, std::mutex* mutex, SimulationInfos* infos);
 
 
 	class Simulator
@@ -61,13 +61,17 @@ namespace Pyewton::Frigg
 		SimulationInfos infos;
 
 		std::thread simulationWorker;
+		std::thread precomputeWorker;
 		std::mutex mutex;
 
 		//Start a thread for computing N passes
-		std::unique_ptr<SystemStateHolder> Precompute(std::vector<Body> bodyList, float simulated_duration, int N);
+		//std::future<std::unique_ptr<SystemStateHolder>> Precompute(BodyList bodyList, float simulated_duration, int N);
+		SimulationHolder* Precompute(BodyList& bodyList, float interval_duration, int N, void(*EndCallback)());
+
+		void SimulateInHolder(BodyList &bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)() = nullptr);
 
 		//Start a thread for computing an infinite number of passes
-		void Start(std::vector<Body>* bodyList, float simulated_duration);
+		void Start(BodyList* bodyList, float simulated_duration);
 		void Stop();
 
 	private:

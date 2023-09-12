@@ -10,8 +10,6 @@ enum ShaderFlags
 {
     shaderFlags_None            = 0,
 
-
-
     //If set, all infos concerning light points will be passed to the shader by uniforms
     shaderFlags_NeedLightPoints     = 1 << 0,
     //If set, all infos concerning ambient light will be passed to the shader by uniforms
@@ -19,6 +17,9 @@ enum ShaderFlags
 
     //If set, the projection and the view matrices will be passed to the shader by uniforms
     shaderFlags_NeedCameraInfo      = 1 << 2,
+
+    //If set, the exposure will be passed to the shader
+    shaderFlags_NeedExposure        = 1 << 3,
 };
 
 class Shader

@@ -75,9 +75,12 @@ namespace Pyewton::Odin
 		//Draw orbits
 		for (auto& body : bodyList)
 		{
-			body.orbit.SetColor(body.color);
+			body.orbit.SetColor(body.appearance.color);
 			body.orbit.Draw(*shaderList.at(orbitShader).get());
 		}
+
+		//Draw grid
+		grid.Draw(*shaderList.at(gridShader).get());
 
 		if (mutex != nullptr) (*mutex).unlock();
 
@@ -107,7 +110,7 @@ namespace Pyewton::Odin
 	}
 
 	void Renderer::UpdateShaders()
-	{
+	{ 
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)viewport_width / viewport_height, 0.1f, 1000.0f);
 
@@ -157,6 +160,11 @@ namespace Pyewton::Odin
 				}
 			}
 
+			// Pass exposure 
+			if (shader.flags & shaderFlags_NeedExposure)
+			{
+				shader.setFloat("exposure", exposure);
+			}
 
 		}
 	}
@@ -172,10 +180,10 @@ namespace Pyewton::Odin
 		lightPointList.clear();
 		for (auto &body : bodyList)
 		{
-			if (body.isEmissive)
+			if (body.appearance.isEmissive)
 			{
-				lightPointList.push_back(body.light);
-				lightPointList.back().position = body.position;
+				lightPointList.push_back(body.appearance.light);
+				lightPointList.back().position = body.physics.position;
 			}
 		}
 

@@ -31,59 +31,66 @@ namespace Pyewton
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		ImGui::StyleColorsDark();
 
-		glfwGetWindowSize(window_, &render_width, &render_height);
+		//Style
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.f);
 
-		renderer.InitRenderer(800, 600);
+		glfwGetWindowSize(window_, &data.render_width, &data.render_height);
 
-		renderer.mainShader = renderer.AddShader(GetShaderPath("vertex.glsl").string().data(), GetShaderPath("fragment.glsl").string().data());
+		data.renderer.InitRenderer(800, 600);
 
-		renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedAmbientLight);
-		renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedLightPoints);
-		renderer.SetShaderFlag(renderer.mainShader, shaderFlags_NeedCameraInfo);
+		data.renderer.mainShader = data.renderer.AddShader(GetShaderPath("vertex.glsl").string().data(), GetShaderPath("fragment.glsl").string().data());
 
-		renderer.orbitShader = renderer.AddShader(GetShaderPath("orbit_v.glsl").string().data(), GetShaderPath("orbit_f.glsl").string().data());
-		renderer.SetShaderFlag(renderer.orbitShader, shaderFlags_NeedCameraInfo);
+		data.renderer.SetShaderFlag(data.renderer.mainShader, shaderFlags_NeedAmbientLight);
+		data.renderer.SetShaderFlag(data.renderer.mainShader, shaderFlags_NeedLightPoints);
+		data.renderer.SetShaderFlag(data.renderer.mainShader, shaderFlags_NeedCameraInfo);
+		data.renderer.SetShaderFlag(data.renderer.mainShader, shaderFlags_NeedExposure);
+
+		data.renderer.orbitShader = data.renderer.AddShader(GetShaderPath("orbit.vert").string().data(), GetShaderPath("orbit.frag").string().data());
+		data.renderer.SetShaderFlag(data.renderer.orbitShader, shaderFlags_NeedCameraInfo);
+
+		data.renderer.gridShader = data.renderer.AddShader(GetShaderPath("grid.vert").string().data(), GetShaderPath("grid.frag").string().data());
+		data.renderer.SetShaderFlag(data.renderer.gridShader, shaderFlags_NeedCameraInfo);
 
 		//setup body list
 		Body sphere1;
 		Body sphere2;
 		Body sphere3;
 
-		sphere1.velocity = glm::vec3(0, 0, 10);
+		sphere1.physics.velocity = glm::vec3(0, 0, 10);
 		sphere1.setPos(-10.f, 0.f, 0.f);
 
 
 		sphere2.setColor(1, 1, 1);
 		sphere2.setPos(10.f, 0.f, 0.f);
-		sphere2.velocity = glm::vec3(0, 0, -10);
+		sphere2.physics.velocity = glm::vec3(0, 0, -10);
 		sphere2.name = std::string("hello");
 		sphere2.setLight(Color(1), 4);
-		sphere2.isEmissive = false;
+		sphere2.appearance.isEmissive = false;
 
-		sphere3.affectOther = false;
-		sphere3.isAffected = false;
-		sphere3.isEmissive = true;
+		sphere3.physics.affectOther = false;
+		sphere3.physics.isAffected = false;
+		sphere3.appearance.isEmissive = true;
 		sphere3.setLight(Color(1, 1, 1), 5);
 		sphere3.name = std::string("Light");
 		 
-		bodyList.push_back(sphere1);
-		bodyList.push_back(sphere2);
-		bodyList.push_back(sphere3);
+		data.editableSystem.push_back(sphere1);
+		data.editableSystem.push_back(sphere2);
+		data.editableSystem.push_back(sphere3);
 
 		//ImGui styling
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowRounding = 6.f;
 
 		//Init time
-		currentFrame = static_cast<float>(glfwGetTime());
-		lastFrame = currentFrame;
-		deltaTime = 0;
+		data.currentFrame = static_cast<float>(glfwGetTime());
+		data.lastFrame = data.currentFrame;
+		data.deltaTime = 0;
 
 		//window pointer 
-		window = window_;
+		data.window = window_;
 
 #ifdef MULTITHREADING
-		simulation.SetModel(Frigg::Simulate);
+		data.simulation.SetModel(Frigg::Simulate);
 		//simulation.Start(&bodyList, 1.f/60.f);
 
 #endif // MULTITHREADING
@@ -96,6 +103,14 @@ namespace Pyewton
 		// Init notifications
 		ImGui::MergeIconsWithLatestFont(16.f, false);
 
+	}
+
+	void Application::InitSubApps()
+	{
+		Viewport viewport;
+		viewport.Init(&data);
+
+		subApps.push_back(viewport);
 	}
 
 	void Application::MainLoop()
@@ -136,23 +151,33 @@ namespace Pyewton
 
 		ImGui::DockSpaceOverViewport();
 
-		DrawBodyList(),
 
-		DrawViewport();
+		DrawBodyList();
+
+		DrawSubApps();
+
+		/*
+		if (show_viewport)
+		{
+			DrawViewport();
+
+		}
+		*/
 
 		DrawSimulationSettings();
 
-		DrawSimulationControl();
-
-		DrawCameraParameters();
-
-		DrawMultithreadingDebug();
+		if (show_cameraParameters)
+		{
+			DrawCameraParameters();
+		}
 
 		DrawPrecomputeDebug();
 
 		DrawPrecomputePlayer();
 
 		DrawNotifications();
+
+		DrawMenu();
 	}
 
 	void Application::UpdateInputs()
@@ -162,12 +187,12 @@ namespace Pyewton
 		static double lastY = 0;
 		static bool firstFrame = true;
 
-		if (isUsingCamera)
+		if (data.isUsingCamera)
 		{
 			double mousex;
 			double mousey;
 
-			glfwGetCursorPos(window, &mousex, &mousey);
+			glfwGetCursorPos(data.window, &mousex, &mousey);
 
 			if (firstFrame)
 			{
@@ -182,7 +207,7 @@ namespace Pyewton
 			lastX = mousex;
 			lastY = mousey;
 
-			renderer.camera.ProcessMouseMovement(xoffset, yoffset);
+			data.renderer.camera.ProcessMouseMovement(xoffset, yoffset);
 		}
 		else
 		{
@@ -199,48 +224,48 @@ namespace Pyewton
 			glfwSetWindowShouldClose(window, true);
 		*/
 
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(FORWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(BACKWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(LEFT, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(RIGHT, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(UP, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			renderer.camera.ProcessKeyboard(DOWN, deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_W) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(FORWARD, data.deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_S) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(BACKWARD, data.deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_A) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(LEFT, data.deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_D) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(RIGHT, data.deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(UP, data.deltaTime);
+		if (glfwGetKey(data.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+			data.renderer.camera.ProcessKeyboard(DOWN, data.deltaTime);
 
-		if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && (currentFrame - lastTABpress) > tabCooldown)
+		if (glfwGetKey(data.window, GLFW_KEY_TAB) == GLFW_PRESS && (data.currentFrame - lastTABpress) > tabCooldown)
 		{
 
-			isUsingCamera = !isUsingCamera;
-			lastTABpress = currentFrame;
+			data.isUsingCamera = !data.isUsingCamera;
+			lastTABpress = data.currentFrame;
 
-			if (isUsingCamera)
+			if (data.isUsingCamera)
 			{
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				glfwSetInputMode(data.window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 			}
 			else
 			{
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				glfwSetInputMode(data.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			}
 		}
 	}
 
 	void Application::UpdateTiming()
 	{
-		currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		data.currentFrame = static_cast<float>(glfwGetTime());
+		data.deltaTime = data.currentFrame - data.lastFrame;
+		data.lastFrame = data.currentFrame;
 	}
 
 	void Application::UpdateReplay()
 	{
-		if (isReplaying)
+		if (data.isReplaying)
 		{
-			player.Next();
+			data.player.Next();
 		}
 	}
 
@@ -255,8 +280,8 @@ namespace Pyewton
 
 	void Application::RenderScene()
 	{
-		if (isReplaying) renderer.Render(player.displayBodyList);
-		else renderer.Render(bodyList, &bodyList_access);
+		if (data.isReplaying) data.renderer.Render(data.player.displayBodyList);
+		else data.renderer.Render(data.editableSystem);
 	}
 
 	void Application::Shutdown() {
@@ -266,55 +291,78 @@ namespace Pyewton
 		ImGui::DestroyContext();
 	}
 
+	void Application::DrawSubApps()
+	{
+		for (auto & app : subApps)
+		{
+			if (app.is_open)
+			{
+				app.Draw();
+			}
+		}
+	}
+
 	void Application::DrawViewport()
 	{
-		ImGui::Begin("Viewport");
+		ImGuiWindowFlags window_flag = 0;
 
-		ImGui::BeginChild("GameRender");
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
-		// Get the size of the child (i.e. the whole draw size of the windows).
-		ImVec2 wsize = ImGui::GetWindowSize();
-		ImVec2 wpos = ImGui::GetWindowPos();
+		if (!ImGui::Begin("Dear ImGui Demo", &show_viewport, window_flag))
+		{
+			// Early out if the window is collapsed, as an optimization.
+			ImGui::End();
+		}
+		else
+		{
+			ImGui::BeginChild("GameRender");
 
-		render_width = wsize.x;
-		render_height = wsize.y;
-		//reste viewport for the renderer
-		renderer.setViewport(render_width, render_height);
-		ImGui::Image((ImTextureID)renderer.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+			// Get the size of the child (i.e. the whole draw size of the windows).
+			ImVec2 wsize = ImGui::GetWindowSize();
+			ImVec2 wpos = ImGui::GetWindowPos();
 
-		ImGui::EndChild();
-		ImGui::End();
+			data.render_width = wsize.x;
+			data.render_height = wsize.y;
+			//reste viewport for the renderer
+			data.renderer.setViewport(data.render_width, data.render_height);
+			ImGui::Image((ImTextureID)data.renderer.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+
+			ImGui::EndChild();
+			ImGui::End();
+		}
+
+		ImGui::PopStyleVar();
 	}
 
 	void Application::DrawBodyList()
 	{
 		ImGui::Begin("Body list");
 		int i = 0;
-		for (auto& body : bodyList)
+		for (auto& body : data.editableSystem)
 		{
 			std::string node_name = std::to_string(i) + " - " + body.name;
 			if (ImGui::TreeNode(node_name.c_str()))
 			{
-				ImGui::DragFloat3("position", &body.position[0]);
+				ImGui::DragFloat3("position", &body.physics.position[0]);
 
 				ImGui::SeparatorText("orbit");
 				ImGui::Text(std::string(std::to_string(body.orbit.vertexList.size())).data());
 
 				ImGui::SeparatorText("Material");
-				ImGui::Checkbox("isEmissive", &body.isEmissive);
-				ImGui::BeginDisabled(!body.isEmissive);
-				ImGui::DragFloat("Strength", &body.light.strength, 0.1f);
-				ImGui::ColorEdit3("Light color", body.light.color.getColor());
+				ImGui::Checkbox("isEmissive", &body.appearance.isEmissive);
+				ImGui::BeginDisabled(!body.appearance.isEmissive);
+				ImGui::DragFloat("Strength", &body.appearance.light.strength, 0.1f);
+				ImGui::ColorEdit3("Light color", body.appearance.light.color.getColor());
 				ImGui::EndDisabled();
 
 				ImGui::SeparatorText("Simulation");
-				ImGui::DragFloat("Mass", &body.mass, 0.1f, 0.f, 10000.f);
-				ImGui::Checkbox("Is affected", &body.isAffected);
-				ImGui::Checkbox("Affect other", &body.affectOther);
+				ImGui::DragFloat("Mass", &body.physics.mass, 0.1f, 0.f, 10000.f);
+				ImGui::Checkbox("Is affected", &body.physics.isAffected);
+				ImGui::Checkbox("Affect other", &body.physics.affectOther);
 
 				ImGui::SeparatorText("Appearance");
-				ImGui::ColorEdit3("Color", body.color.getColor());
-				ImGui::SliderFloat("Size", &body.size, 0.01f, 10.f);
+				ImGui::ColorEdit3("Color", body.appearance.color.getColor());
+				ImGui::SliderFloat("Size", &body.appearance.size, 0.01f, 10.f);
 
 				ImGui::TreePop();
 			}
@@ -322,35 +370,17 @@ namespace Pyewton
 		}
 		if (ImGui::Button("Add planet"))
 		{
-			bodyList.push_back(Body("hello"));
+			data.editableSystem.push_back(Body("hello"));
 		}
 		ImGui::SameLine();
 		ImGui::Button("delete");
 		ImGui::End();
 	}
 
-	void Application::DrawSimulationControl()
-	{
-		if (ImGui::Begin("Simulation Control"))
-		{
-			ImGui::Checkbox("isSimulationRunning", &isSimulationRunning);
-		}
-
-		if (ImGui::Button("Reset Orbits"))
-		{
-			bodyList_access.lock();
-			for (auto& body : bodyList)
-			{
-				body.ResetOrbit();
-			}
-			bodyList_access.unlock();
-		}
-		ImGui::End();
-	}
-
 	void Application::DrawSimulationSettings()
 	{
-		ImGui::Begin("Simulation settings");
+
+		ImGui::Begin("Simulation settings", &show_cameraParameters);
 
 		{
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
@@ -358,12 +388,13 @@ namespace Pyewton
 			ImGui::BeginChild("ChildR", ImVec2(300, 0), true, window_flags);
 
 			ImGui::SeparatorText("Appearance");
-			ImGui::ColorEdit3("Ambient", renderer.ambientLight.getColor());
+			ImGui::ColorEdit3("Ambient", data.renderer.ambientLight.getColor());
+			ImGui::DragFloat("Exposure", &data.renderer.exposure, 0.1f, 0.f);
 
 			ImGui::EndChild();
 			ImGui::SameLine();
 			
-			ImGui::Checkbox("Postprocessing", &renderer.postprocesingEnable);
+			ImGui::Checkbox("Postprocessing", &data.renderer.postprocesingEnable);
 
 			ImGui::PopStyleVar();
 		}
@@ -375,103 +406,54 @@ namespace Pyewton
 	{
 		if (ImGui::Begin("Camera"))
 		{
-			ImGui::DragFloat("Speed", &renderer.camera.MovementSpeed, 0.1);
-			ImGui::DragFloat("FOV", &renderer.camera.Zoom, 0.1f, 1, 120);
+			ImGui::DragFloat("Speed", &data.renderer.camera.MovementSpeed, 0.1);
+			ImGui::DragFloat("FOV", &data.renderer.camera.Zoom, 0.1f, 1, 120);
 		}
 		ImGui::End();
 	}
 
-	void Application::DrawMultithreadingDebug()
-	{
-		static auto begining = std::chrono::steady_clock::now();
-		static int lastPassnb = 0;
-		static std::vector<float> nbPass;
-		static int pushControl = 0;
-
-		auto current = std::chrono::steady_clock::now();
-		auto sinceFirst = std::chrono::duration_cast<std::chrono::seconds>(current - begining);
-
-		simulation.infos.mutex.lock();
-
-		pushControl = (pushControl + 1) % 60;
-		if (pushControl == 0)
-		{
-
-			nbPass.push_back(simulation.infos.nbIterations);
-		}
-
-		//float passPerSec_average = simulation.infos.nbIterations / sinceFirst.count();
-		//passPerSec_average /= pow(10, 9); // Convert from nanoseconds to seconds
-
-		float passPerSec_average = simulation.infos.nbIterations / (sinceFirst.count() + 1);
-		//passPerSec_current /= pow(10, 9); // Convert from nanoseconds to seconds
-
-		lastPassnb = simulation.infos.nbIterations;
-		if (ImGui::Begin("Multithreading"))
-		{
-			ImGui::BeginDisabled(simulation.infos.isSimulationRunning);
-			if (ImGui::Button("start sim"))
-			{
-				simulation.Start(&bodyList, 1.f/60.f);
-			}
-			ImGui::EndDisabled();
-			ImGui::SameLine();
-			ImGui::BeginDisabled(!simulation.infos.isSimulationRunning);
-			if (ImGui::Button("stop sim"))
-			{
-				simulation.Stop();
-			}
-			ImGui::EndDisabled();
-
-			ImGui::DragInt("SimPerBatch", &simulation.infos.simulationPerBatch);
-			ImGui::DragInt("ns between batchs", (int*)&simulation.infos.durationBtwBatch, 1.f, 250, 25000);
-			ImGui::Text("pass per sec : %.0f", passPerSec_average);
-			ImGui::PlotLines("", nbPass.data(), nbPass.size(), 0, (const char*)0, FLT_MAX, FLT_MAX, ImVec2(0, 200));
-			ImGui::End();
-		}
-		simulation.infos.mutex.unlock();
-		
-	}
-
 	void Application::DrawPrecomputeDebug()
 	{
-		
-
-
 		if (ImGui::Begin("Precompute"))
 		{
 			if (ImGui::Button("Precompute - start"))
 			{
-				auto holder_ = simulation.Precompute(bodyList, 1.0f / 60.f, 10000);
-				holders.push_back(std::move(holder_));
-				ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Hello World! This is a success! %s", "We can also format here:)" });
+				auto holder_ = data.simulation.Precompute(data.editableSystem, 1.0f / 60.f, 500000,
+					[]() {
+						ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Finish !" });
+					}
+				);
+
+				data.holders.push_back(std::unique_ptr<Frigg::SimulationHolder>(holder_));
+				//ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Hello World! This is a success! %s", "We can also format here:)" });
 			}
 
 			int i = 0;
-			for (auto& holder : holders)
+			for (auto& holder : data.holders)
 			{
+				ImGui::BeginDisabled(holder.get()->isPrecomputing);
 				if (ImGui::TreeNode(std::to_string(i).data()))
 				{
-					ImGui::Text("Size : %d", holder.get()->size);
-					ImGui::Text("Simulated : %d", holder.get()->back_state);
-
 					if (ImGui::Button("Load in player"))
 					{
-						player.SetHolder(holder.get());
-						player.SetBodyList(bodyList);
-						isHolderLoaded = true;
-						loadedHolderIndex = i;
+						data.displaySystem = data.editableSystem;
+
+						data.player.SetHolder(holder.get());
+						data.player.SetBodyList(data.displaySystem);
+						data.isHolderLoaded = true;
+						data.loadedHolderIndex = i;
 					}
 
-					ImGui::BeginDisabled(isReplaying);
+					ImGui::BeginDisabled(data.isReplaying);
 					if (ImGui::Button("Delete"))
 					{
-						holders.erase(holders.begin() + i);
+						data.holders.erase(data.holders.begin() + i);
 					}
 					ImGui::EndDisabled();
 
 					ImGui::TreePop();
 				}
+				ImGui::EndDisabled();
 
 				i++;
 			}
@@ -483,28 +465,30 @@ namespace Pyewton
 	void Application::DrawPrecomputePlayer()
 	{
 		char buf[128];
-		const char* title_{ isHolderLoaded ? "Player - %d###Player" : "Player###Player" };
-		sprintf(buf, title_, loadedHolderIndex);
+		const char* title_{ data.isHolderLoaded ? "Player - %d###Player" : "Player###Player" };
+		sprintf(buf, title_, data.loadedHolderIndex);
 
 		if (ImGui::Begin(buf))
 		{
+			ImGui::BeginDisabled(!data.isHolderLoaded);
 			if (ImGui::ArrowButton("#play", ImGuiDir_Right))
 			{
-				isReplaying = !isReplaying;
-				player.ResetReplayPos();
+				data.isReplaying = !data.isReplaying;
+				data.player.ResetReplayPos();
 			}
 			ImGui::SameLine();
 
-			if (isReplaying) ImGui::Text("Playing ...");
+			if (data.isReplaying) ImGui::Text("Playing ...");
 			else ImGui::Text("Stoped");
 
-			if (isReplaying)
+			if (data.isReplaying)
 			{
-				ImGui::Text("%d", player.replayPos); 
+				ImGui::Text("%f", data.player.replayPos); 
 			}
 
-			ImGui::DragFloat("Speed", &player.replaySpeed, 0.1f, 1.f, 10.f);
+			ImGui::DragFloat("Speed", &data.player.replaySpeed, 0.1f, 0.1f, 1000.f);
 
+			ImGui::EndDisabled();
 			ImGui::End();
 		}
 	}
@@ -518,7 +502,37 @@ namespace Pyewton
 		ImGui::PopStyleColor(1);
 	}
 
+	void Application::DrawMenu()
+	{
 
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				ImGui::EndMenu();
+			}
 
+			if (ImGui::BeginMenu("Window"))
+			{
+				ImGui::MenuItem("Viewport", nullptr, &show_viewport);
+				ImGui::MenuItem("Camera", nullptr, &show_cameraParameters);
+				ImGui::MenuItem("Precompute", nullptr, &show_precomputeDebug);
 
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
+
+	}
+
+	void Application::SyncBodyLists()
+	{
+		int i = 0;
+
+		for (auto& body : data.editableSystem)
+		{
+
+		}
+	}
 }

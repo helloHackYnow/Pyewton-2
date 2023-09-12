@@ -194,7 +194,7 @@ public:
 		return 1.f * NOTIFY_OPACITY;
 	}
 
-	NOTIFY_INLINE static unsigned long long GetTickCount()
+	NOTIFY_INLINE static auto GetTickCount() -> const unsigned long long
 	{
 		using namespace std::chrono;
 		return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();

@@ -22,6 +22,7 @@ uniform int nb_lights;
 uniform PointLight light_points[MAX_NUM_TOTAL_LIGHTS];
 
 uniform vec3 ambient;
+//uniform float exposure;
 
 vec3 CalcPointLight(PointLight light){
     vec3 norm = normalize(Normal);

@@ -4,9 +4,9 @@ namespace Pyewton::Frigg
 {
 	using namespace std::chrono_literals;
 
-	void Simulate(std::vector<Body>* bodyList_, float simulated_duration)
+	void Simulate(BodyList* bodyList_, float simulated_duration, bool update_orbit)
 	{
-		std::vector<Body> & bodyList = *bodyList_;
+		BodyList & bodyList = *bodyList_;
 
 		int nbBody = bodyList.size();
 
@@ -15,45 +15,47 @@ namespace Pyewton::Frigg
 			[&i, &bodyList, nbBody, simulated_duration](Body& body)
 			{
 				//Do other bodies affect the current one
-				if (body.isAffected)
+				if (body.physics.isAffected)
 				{
 					glm::vec3 attraction = glm::vec3(0, 0, 0);
 
 					for (int j = 0; j < nbBody; j++)
 					{
-						if (i != j && bodyList[j].affectOther)
+						if (i != j && bodyList[j].physics.affectOther)
 						{
-							glm::vec3 vec_ij = bodyList[j].position - body.position;
+							glm::vec3 vec_ij = bodyList[j].physics.position - body.physics.position;
 							float dst = vec_ij.length();
 
 							glm::vec3 attraction_local = vec_ij;
 
-							attraction_local *= (body.mass * bodyList[j].mass) / (dst * dst);
+							attraction_local *= (body.physics.mass * bodyList[j].physics.mass) / (dst * dst);
 							attraction += attraction_local;
 						}
 					}
 
 					//Apply the attraction
-					bodyList[i].velocity += (attraction * simulated_duration) / bodyList[i].mass;
+					bodyList[i].physics.velocity += (attraction * simulated_duration) / bodyList[i].physics.mass;
 				}
 				i++;
 			});
 
-
 		for (int i = 0; i < nbBody; i++)
 		{
-			if (bodyList[i].isAffected)
+			if (bodyList[i].physics.isAffected)
 			{
 				//Update the position
 
-				bodyList[i].position += bodyList[i].velocity * simulated_duration;
-				bodyList[i].UpdateOrbit();
+				bodyList[i].physics.position += bodyList[i].physics.velocity * simulated_duration;
+				if (update_orbit)
+				{
+					bodyList[i].UpdateOrbit();
+				}
 			}
 		}
 	}
 
 
-	void SimulateLoop(SimulationFunction simulate, std::vector<Body>* bodyList, float simulated_duration, std::mutex* mutex, SimulationInfos* infos)
+	void SimulateLoop(SimulationFunction simulate, BodyList* bodyList, float simulated_duration, std::mutex* mutex, SimulationInfos* infos)
 	{
 		using namespace std::chrono;
 
@@ -69,7 +71,7 @@ namespace Pyewton::Frigg
 			for (int i = 0; i < simPerBatch; i++)
 			{
 				mutex->lock();
-				simulate(bodyList, simulated_duration);
+				simulate(bodyList, simulated_duration, false);
 				mutex->unlock();
 			}
 
@@ -82,24 +84,38 @@ namespace Pyewton::Frigg
 		simulationModel = Frigg::Simulate;
 	}
 
-	std::unique_ptr<SystemStateHolder> Simulator::Precompute(std::vector<Body> bodyList, float simulated_duration, int N)
+	SimulationHolder* Simulator::Precompute(BodyList& bodyList, float interval_duration, int N, void(*EndCallback)())
 	{
-		std::vector<Body> myBodyList = bodyList;
+		SimulationHolder *holder = new SimulationHolder;
 
-		SystemStateHolder* ptr = new SystemStateHolder(myBodyList.size(), N, simulated_duration);
+		holder->Init(bodyList.size(), N);
 
-		for (int i = 0; i < N; i++)
-		{
-			Frigg::Simulate(&myBodyList, simulated_duration);
-			ptr->AddState(&myBodyList);
-		}
+		SimulateInHolder(bodyList, interval_duration, N, holder, EndCallback);
 
-		std::unique_ptr<SystemStateHolder> ptr_(ptr);
-
-		return ptr_;
+		return holder;
 	}
 
-	void Simulator::Start(std::vector<Body>* bodyList, float simulated_duration)
+	void Simulator::SimulateInHolder(BodyList &bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)())
+	{
+		BodyList *my_BodyList = &bodylist;
+
+		precomputeWorker = std::thread(
+			[=]() {
+				holder->isPrecomputing = true;
+				for (int i = 0; i < N; i++)
+				{
+					Frigg::Simulate(my_BodyList, intervalDuration);
+					holder->AppendState(*my_BodyList);
+				}
+
+				//holder->PasteVelocity(*my_BodyList);
+				holder->isPrecomputing = false;
+				EndCallback();
+			}
+		);
+	}
+
+	void Simulator::Start(BodyList* bodyList, float simulated_duration)
 	{
 		std::cout << "Starting simualtion thread ...\n";
 		if (!infos.isSimulationRunning)

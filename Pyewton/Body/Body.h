@@ -1,12 +1,43 @@
 #pragma once
 
 #include "../Renderer/Model.h"
+#include "../Files.h"
 #include "../Renderer/Mesh.h"
+#include "../namespaces_.h"
 #include <filesystem>
 #include "../Renderer/Light.h"
 #include <glm/glm.hpp>
 #include "../Renderer/Color.h"
 #include "Orbit.h"
+#include <vector>
+
+namespace Pyewton
+{
+
+	struct BodyAppearance
+	{
+		Color color = Color(1);
+		float size = 1.f;
+		
+		PointLight light;
+		bool isEmissive		= false;
+
+		Model model;
+	};
+
+	struct BodyPhysics
+	{
+		glm::vec3 position;
+		glm::vec3 velocity;
+		float mass = 10;
+		bool affectOther = true;
+		bool isAffected = true;
+	};
+
+class Body;
+typedef std::vector<Body> BodyList;
+
+
 class Body
 {
 public:
@@ -31,24 +62,16 @@ public:
 	glm::vec3 getPos();
 
 public:
-	//Cosmetic
-	Color color = Color(1);
 	std::string name;
-	float size = 1.f;
 
-	glm::vec3 position;
-	glm::vec3 velocity;
-	float mass = 10;
+	BodyAppearance appearance;
 
-	PointLight light;
-
-	bool isEmissive = false;
-
-	bool affectOther = true;
-	bool isAffected = true;
+	BodyPhysics physics;
 
 	Orbit orbit;
 
 private:
 	Model model;
 };
+
+} // Namespace Pyewton

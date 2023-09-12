@@ -1,4 +1,8 @@
 #include "Framebuffer.h"
+/*
+* Abstaction layer for handling frambuffer objects
+*/
+
 
 namespace Pyewton::Odin {
 
@@ -12,7 +16,7 @@ namespace Pyewton::Odin {
 		glDeleteFramebuffers(1, &fboID);
 		glDeleteRenderbuffers(1, &rboID);
 	}
-
+	
 	void FrameBuffer::Init(int _width, int _height, bool isHDR, int samples)
 	{
 		dimensions = glm::vec2(_width, _height);

@@ -1,19 +1,41 @@
 #pragma once
 
-#include "Precompute/Precompute.h"
 #include "Simulation.h"
+#include <stdexcept>
 
 namespace Pyewton::Frigg
 {
-	class Player
+	class SimulationHolder
 	{
 	public:
-		Player() = default;
-		~Player() = default;
+		SimulationHolder() = default;
+		~SimulationHolder();
 
-		void SetBodyList(std::vector<Body> list);
+		void Init(int bodyListSize, int simulationLenght);
+		void AppendState(BodyList& bodyList);
+		void PasteState(BodyList& bodyList, int index); //Without lerp
+		void PasteState(BodyList& bodyList, float index); // With lerp
+		void SetVelocity(BodyList& bodyList);
+		void PasteVelocity(BodyList& bodyList);
 
-		void SetHolder(SystemStateHolder* holder);
+	public:
+		glm::vec3* data;
+		int lastIndex;
+		int maxIndex;
+		int systemSize;
+
+		bool isPrecomputing = false;
+	};
+
+	class ReplayControler
+	{
+	public:
+		ReplayControler() = default;
+		~ReplayControler() = default;
+
+		void SetBodyList(BodyList list);
+
+		void SetHolder(SimulationHolder* holder);
 		void SetSpeed(float speed);
 
 		void ResetReplayPos();
@@ -21,13 +43,11 @@ namespace Pyewton::Frigg
 		void StartReplay();
 		void Next();
 
-		std::vector<Body> displayBodyList;
+		BodyList displayBodyList;
 		float replaySpeed = 1;
-		int replayPos = 0;
+		float replayPos = 0;
 	private:
 
-		SystemStateHolder* holder;
-
-
+		SimulationHolder* holder;
 	};
 }
