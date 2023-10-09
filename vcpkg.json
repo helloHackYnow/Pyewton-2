@@ -8,7 +8,9 @@
     "glfw3",
     "glad",
     "assimp",
-    "glm"
+    "glm",
+    "jsoncpp",
+    "folly"
   ],
   "name": "pyewton",
   "version": "0.1"
