@@ -1,20 +1,14 @@
 #pragma once
 
-#include "Pyewton.h"
 #include "Body/Body.h"
 #include "Renderer/Renderer.h"
-#include "Simulation/replay.h"
-#include "Simulation/Simulation.h"
-
-namespace Pyewton
-{
 
 struct AppData
 {
 	GLFWwindow* window = nullptr;
-	Odin::Renderer renderer;
-	BodyList displaySystem;
-	BodyList editableSystem;
+	Pyewton::Odin::Renderer renderer;
+	Pyewton::BodyList displaySystem;
+	Pyewton::BodyList editableSystem;
 
 	std::mutex bodyList_access;
 
@@ -32,18 +26,22 @@ struct AppData
 	float lastFrame = 1.f;
 
 	bool isSimulationRunning = false;
-	Frigg::Simulator simulation;
+	Pyewton::Frigg::Simulator simulation;
 
 	bool isPrecomputing = false;
 
 	//Hold all the simulations holders pointers
-	std::vector<std::unique_ptr<Frigg::SimulationHolder>> holders;
+	std::vector<std::unique_ptr<Pyewton::Frigg::SimulationHolder>> holders;
 
 
-	Frigg::ReplayControler player;
+	Pyewton::Frigg::ReplayControler player;
 	bool isReplaying = false;
 	bool isHolderLoaded = false;
 	int loadedHolderIndex = 0;
-};
 
-}
+	bool is_saving = false;
+	bool is_opening = false;
+
+	int focused_subApp_index = -1; //index of the currently focused subApp, -1 means none are focused
+
+};

@@ -80,7 +80,10 @@ namespace Pyewton::Odin
 		}
 
 		//Draw grid
-		grid.Draw(*shaderList.at(gridShader).get());
+		if (drawGridEnable)
+		{
+			grid.Draw(*shaderList.at(gridShader).get());
+		}
 
 		if (mutex != nullptr) (*mutex).unlock();
 

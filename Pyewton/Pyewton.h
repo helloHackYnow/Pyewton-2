@@ -8,13 +8,20 @@
 #include <imgui_impl_opengl3.h>
 #include <vector>
 #include <filesystem>
+#include <thread>
 #include "Simulation/replay.h"
 #include "Simulation/Simulation.h"
 #include "A3rdParty/imgui-notify/imgui_notify.h"
 #include "A3rdParty/Fonts/tahoma.h"
+#include "A3rdParty/ImSpinner/imspinner.h"
 #include <format>
-#include "SubApps/Viewport/Viewport.h"
+//#include "SubApps/Viewport/Viewport.h"
 #include "AppData.h"
+#include "SubApp/Collection.h" 
+#include "AppControllers.h"
+#include "JSON/Loader.h"
+#include "A3rdParty/ImFileDialog/ImFileDialog.h"
+
 
 namespace Pyewton
 {
@@ -24,7 +31,7 @@ namespace Pyewton
 	public:
 		Application();
 		void Init(GLFWwindow* window, const char* glsl_version);
-		void InitSubApps();
+		void SetupImGuiStyle();
 		void MainLoop();
 
 		void NewFrame();
@@ -32,12 +39,17 @@ namespace Pyewton
 		void UpdateInputs();
 		void UpdateTiming();
 		void UpdateReplay();
+		void UpdateFocusedSubAppIndex();
 		void RenderUI();
 		void RenderScene();
 		void Shutdown();
 
 		// All draw func
 	private:
+		template<typename SubApp_Type> void AddSubApps(std::string name);
+
+
+		void InitSubApps();
 		void DrawSubApps();
 
 		void DrawViewport();
@@ -49,12 +61,18 @@ namespace Pyewton
 		void DrawNotifications();
 		void DrawMenu();
 
-		void SyncBodyLists();
+		void SaveFunction();
+		void LoadFunction();
+
+		void SyncBodyListsStyle();
+
+		void UpdateFileDialog();
 
 	public:
 
 		AppData data;
-		std::vector<SubApp> subApps;
+		AppControllers controllers;
+		std::vector<std::unique_ptr<App::SubApp>> subApps;
 
 	private:
 

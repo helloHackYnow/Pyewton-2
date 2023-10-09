@@ -61,14 +61,14 @@ namespace Pyewton::Frigg
 		SimulationInfos infos;
 
 		std::thread simulationWorker;
-		std::thread precomputeWorker;
+		std::thread* precomputeWorker;
 		std::mutex mutex;
 
 		//Start a thread for computing N passes
 		//std::future<std::unique_ptr<SystemStateHolder>> Precompute(BodyList bodyList, float simulated_duration, int N);
-		SimulationHolder* Precompute(BodyList& bodyList, float interval_duration, int N, void(*EndCallback)());
+		SimulationHolder* Precompute(BodyList& bodyList, float interval_duration, int N, void(*EndCallback)() = nullptr);
 
-		void SimulateInHolder(BodyList &bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)() = nullptr);
+		std::thread* CreatePrecomputeThread(BodyList& bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)() = nullptr);
 
 		//Start a thread for computing an infinite number of passes
 		void Start(BodyList* bodyList, float simulated_duration);

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REPLAY_H
+#define REPLAY_H
 
 #include "Simulation.h"
 #include <stdexcept>
@@ -19,6 +20,7 @@ namespace Pyewton::Frigg
 		void PasteVelocity(BodyList& bodyList);
 
 	public:
+		BodyList initialSystem;
 		glm::vec3* data;
 		int lastIndex;
 		int maxIndex;
@@ -51,3 +53,5 @@ namespace Pyewton::Frigg
 		SimulationHolder* holder;
 	};
 }
+
+#endif //REPLAY_H

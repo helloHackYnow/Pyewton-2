@@ -1,18 +1,22 @@
 #pragma once
 
-#include "../Renderer/Model.h"
-#include "../Files.h"
-#include "../Renderer/Mesh.h"
-#include "../namespaces_.h"
-#include <filesystem>
-#include "../Renderer/Light.h"
-#include <glm/glm.hpp>
-#include "../Renderer/Color.h"
-#include "Orbit.h"
-#include <vector>
+	#include "../Files.h"
+	#include "../Renderer/Model.h"
+	#include "../Renderer/Mesh.h"
+	#include "../Renderer/Light.h"
+	#include "../Renderer/Color.h"
+
+	#include "Orbit.h"
+
+	#include <glm/glm.hpp>
+	#include <filesystem>
+	#include <vector>
 
 namespace Pyewton
 {
+
+class Body;
+typedef std::vector<Body> BodyList;
 
 	struct BodyAppearance
 	{
@@ -33,9 +37,6 @@ namespace Pyewton
 		bool affectOther = true;
 		bool isAffected = true;
 	};
-
-class Body;
-typedef std::vector<Body> BodyList;
 
 
 class Body
@@ -69,9 +70,6 @@ public:
 	BodyPhysics physics;
 
 	Orbit orbit;
-
-private:
-	Model model;
 };
 
 } // Namespace Pyewton

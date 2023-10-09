@@ -17,6 +17,97 @@ namespace Pyewton
 
 	}
 
+	void Application::SetupImGuiStyle()
+	{
+		// Future Dark style by rewrking from ImThemes
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		style.Alpha = 1.0f;
+		style.DisabledAlpha = 1.0f;
+		style.WindowPadding = ImVec2(12.0f, 12.0f);
+		style.WindowRounding = 0.0f;
+		style.WindowBorderSize = 0.0f;
+		style.WindowMinSize = ImVec2(20.0f, 20.0f);
+		style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+		style.WindowMenuButtonPosition = ImGuiDir_None;
+		style.ChildRounding = 0.0f;
+		style.ChildBorderSize = 1.0f;
+		style.PopupRounding = 0.0f;
+		style.PopupBorderSize = 1.0f;
+		style.FramePadding = ImVec2(6.0f, 6.0f);
+		style.FrameRounding = 0.0f;
+		style.FrameBorderSize = 0.0f;
+		style.ItemSpacing = ImVec2(12.0f, 6.0f);
+		style.ItemInnerSpacing = ImVec2(6.0f, 3.0f);
+		style.CellPadding = ImVec2(12.0f, 6.0f);
+		style.IndentSpacing = 20.0f;
+		style.ColumnsMinSpacing = 6.0f;
+		style.ScrollbarSize = 12.0f;
+		style.ScrollbarRounding = 0.0f;
+		style.GrabMinSize = 12.0f;
+		style.GrabRounding = 0.0f;
+		style.TabRounding = 0.0f;
+		style.TabBorderSize = 0.0f;
+		style.TabMinWidthForCloseButton = 0.0f;
+		style.ColorButtonPosition = ImGuiDir_Right;
+		style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
+		style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
+
+		style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.2745098173618317f, 0.3176470696926117f, 0.4509803950786591f, 1.0f);
+		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_PopupBg] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_Border] = ImVec4(0.1568627506494522f, 0.168627455830574f, 0.1921568661928177f, 1.0f);
+		style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.1568627506494522f, 0.168627455830574f, 0.1921568661928177f, 1.0f);
+		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.2352941185235977f, 0.2156862765550613f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_TitleBg] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.09803921729326248f, 0.105882354080677f, 0.1215686276555061f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.1568627506494522f, 0.168627455830574f, 0.1921568661928177f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_CheckMark] = ImVec4(0.4980392158031464f, 0.5137255191802979f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.4980392158031464f, 0.5137255191802979f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5372549295425415f, 0.5529412031173706f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_Button] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 1.0f);
+		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.2352941185235977f, 0.2156862765550613f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_Header] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 1.0f);
+		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.2352941185235977f, 0.2156862765550613f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_Separator] = ImVec4(0.1568627506494522f, 0.1843137294054031f, 0.250980406999588f, 1.0f);
+		style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.1568627506494522f, 0.1843137294054031f, 0.250980406999588f, 1.0f);
+		style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.1568627506494522f, 0.1843137294054031f, 0.250980406999588f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.2352941185235977f, 0.2156862765550613f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_Tab] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TabHovered] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_TabActive] = ImVec4(0.09803921729326248f, 0.105882354080677f, 0.1215686276555061f, 1.0f);
+		style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.0784313753247261f, 0.08627451211214066f, 0.1019607856869698f, 1.0f);
+		style.Colors[ImGuiCol_PlotLines] = ImVec4(0.5215686559677124f, 0.6000000238418579f, 0.7019608020782471f, 1.0f);
+		style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.03921568766236305f, 0.9803921580314636f, 0.9803921580314636f, 1.0f);
+		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.0f, 0.2901960909366608f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.9960784316062927f, 0.4745098054409027f, 0.6980392336845398f, 1.0f);
+		style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.0470588244497776f, 0.05490196123719215f, 0.07058823853731155f, 1.0f);
+		style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.1176470592617989f, 0.1333333402872086f, 0.1490196138620377f, 1.0f);
+		style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.09803921729326248f, 0.105882354080677f, 0.1215686276555061f, 1.0f);
+		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.2352941185235977f, 0.2156862765550613f, 0.5960784554481506f, 1.0f);
+		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.4980392158031464f, 0.5137255191802979f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.4980392158031464f, 0.5137255191802979f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.4980392158031464f, 0.5137255191802979f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 0.501960813999176f);
+		style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 0.501960813999176f);
+	}
+
 	void Application::Init(GLFWwindow* window_, const char* glsl_version) {
 
 		IMGUI_CHECKVERSION();
@@ -102,15 +193,31 @@ namespace Pyewton
 
 		// Init notifications
 		ImGui::MergeIconsWithLatestFont(16.f, false);
+		SetupImGuiStyle();
+
+		InitSubApps();
+
+		controllers.simulationController = new Frigg::SimulationController(&data.holders);
 
 	}
 
+	
+
 	void Application::InitSubApps()
 	{
-		Viewport viewport;
-		viewport.Init(&data);
+		
+		AddSubApps<App::Viewport>("viewport");
+		AddSubApps<App::BodyList>("bodylist");
+		
+	}
 
-		subApps.push_back(viewport);
+	template<typename SubApp_Type> void Application::AddSubApps(std::string name)
+	{
+		SubApp_Type sub_app;
+		sub_app.Init(&data);
+		sub_app.name = name;
+
+		subApps.push_back(std::make_unique<SubApp_Type>(sub_app));
 	}
 
 	void Application::MainLoop()
@@ -119,22 +226,19 @@ namespace Pyewton
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-
-#ifndef MULTITHREADING
-		if(isSimulationRunning) Frigg::Simulate(&bodyList, 1.f / 60.f);
-#endif // !MULTITHREADING
-
-
 		UpdateInputs();
 		UpdateTiming();
 
 		NewFrame();
 		UpdateUI();
+		UpdateFileDialog();
 		
 		UpdateReplay();
 		RenderScene();
 
 		RenderUI();
+
+		UpdateFocusedSubAppIndex();
 	}
 
 
@@ -152,7 +256,7 @@ namespace Pyewton
 		ImGui::DockSpaceOverViewport();
 
 
-		DrawBodyList();
+		//DrawBodyList();
 
 		DrawSubApps();
 
@@ -182,75 +286,9 @@ namespace Pyewton
 
 	void Application::UpdateInputs()
 	{
-		//Mouse input
-		static double lastX = 0;
-		static double lastY = 0;
-		static bool firstFrame = true;
-
-		if (data.isUsingCamera)
+		if (data.focused_subApp_index != -1)
 		{
-			double mousex;
-			double mousey;
-
-			glfwGetCursorPos(data.window, &mousex, &mousey);
-
-			if (firstFrame)
-			{
-				lastX = mousex;
-				lastY = mousey;
-				firstFrame = false;
-			}
-
-			double xoffset = mousex - lastX;
-			double yoffset = lastY - mousey;
-
-			lastX = mousex;
-			lastY = mousey;
-
-			data.renderer.camera.ProcessMouseMovement(xoffset, yoffset);
-		}
-		else
-		{
-			firstFrame = true;
-		}
-
-
-		//Keyboard input
-		static float lastTABpress = 0;
-		const float tabCooldown = 0.5f;
-		
-		/*
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			glfwSetWindowShouldClose(window, true);
-		*/
-
-		if (glfwGetKey(data.window, GLFW_KEY_W) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(FORWARD, data.deltaTime);
-		if (glfwGetKey(data.window, GLFW_KEY_S) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(BACKWARD, data.deltaTime);
-		if (glfwGetKey(data.window, GLFW_KEY_A) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(LEFT, data.deltaTime);
-		if (glfwGetKey(data.window, GLFW_KEY_D) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(RIGHT, data.deltaTime);
-		if (glfwGetKey(data.window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(UP, data.deltaTime);
-		if (glfwGetKey(data.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			data.renderer.camera.ProcessKeyboard(DOWN, data.deltaTime);
-
-		if (glfwGetKey(data.window, GLFW_KEY_TAB) == GLFW_PRESS && (data.currentFrame - lastTABpress) > tabCooldown)
-		{
-
-			data.isUsingCamera = !data.isUsingCamera;
-			lastTABpress = data.currentFrame;
-
-			if (data.isUsingCamera)
-			{
-				glfwSetInputMode(data.window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			}
-			else
-			{
-				glfwSetInputMode(data.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			}
+			subApps.at(data.focused_subApp_index)->ProcessInputs();
 		}
 	}
 
@@ -269,13 +307,28 @@ namespace Pyewton
 		}
 	}
 
+	void Application::UpdateFocusedSubAppIndex()
+	{
+		if (data.focused_subApp_index != -1) std::cout << "focused app : " << subApps.at(data.focused_subApp_index)->name << " \n";
+		else std::cout << "None focused\n";
+		int i = 0;
+		for (auto & subApp : subApps)
+		{
+			if (subApp->is_focused)
+			{
+				data.focused_subApp_index = i;
+				return;
+			}
+			i++;
+		}
+		data.focused_subApp_index = -1;
+
+	}
+
 	void Application::RenderUI() {
 
 		// Render dear imgui into screen
 		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		
 	}
 
 	void Application::RenderScene()
@@ -285,6 +338,8 @@ namespace Pyewton
 	}
 
 	void Application::Shutdown() {
+		delete controllers.simulationController;
+
 		// Cleanup
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -292,14 +347,26 @@ namespace Pyewton
 	}
 
 	void Application::DrawSubApps()
-	{
+	{ 
+		bool is_any_focused = false;
 		for (auto & app : subApps)
 		{
-			if (app.is_open)
+			if (app->is_open)
 			{
-				app.Draw();
+				app->Draw();
+			}
+
+			if (app->is_focused)
+			{
+				is_any_focused = true;
 			}
 		}
+
+		if (!is_any_focused)
+		{
+			//ImGui::SetWindowFocus(NULL);
+		}
+	  
 	}
 
 	void Application::DrawViewport()
@@ -395,6 +462,7 @@ namespace Pyewton
 			ImGui::SameLine();
 			
 			ImGui::Checkbox("Postprocessing", &data.renderer.postprocesingEnable);
+			ImGui::Checkbox("Draw Grid", &data.renderer.drawGridEnable);
 
 			ImGui::PopStyleVar();
 		}
@@ -414,26 +482,40 @@ namespace Pyewton
 
 	void Application::DrawPrecomputeDebug()
 	{
+		static int nb_iterations = 1000000;
 		if (ImGui::Begin("Precompute"))
 		{
+			ImGui::DragInt("Nb iterations", &nb_iterations, 100);
+			// Calcul de la taille du holder
+			unsigned long int holder_size = sizeof(glm::vec3) * data.editableSystem.size() *( nb_iterations / (1024.0*1024.0));
+			ImGui::Text("Size in memory : %i Mo", holder_size);
+			
+
 			if (ImGui::Button("Precompute - start"))
 			{
-				auto holder_ = data.simulation.Precompute(data.editableSystem, 1.0f / 60.f, 500000,
-					[]() {
-						ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Finish !" });
-					}
-				);
+				Frigg::SimulationRequest request;
+				request.iterations = nb_iterations;
+				request.systemInitialState = data.editableSystem;
+				request.time_btwn_iterations = 1 / 60.f;
 
-				data.holders.push_back(std::unique_ptr<Frigg::SimulationHolder>(holder_));
-				//ImGui::InsertNotification({ ImGuiToastType_Success, 3000, "Hello World! This is a success! %s", "We can also format here:)" });
+				controllers.simulationController->AddRequestToQueue(request);
 			}
 
 			int i = 0;
 			for (auto& holder : data.holders)
 			{
 				ImGui::BeginDisabled(holder.get()->isPrecomputing);
-				if (ImGui::TreeNode(std::to_string(i).data()))
+				bool is_tree_open = ImGui::TreeNode(std::to_string(i).data());
+
+				if (holder.get()->isPrecomputing)
 				{
+					ImGui::SameLine();
+					ImSpinner::SpinnerDotsLoading("Spinner", 7, 2, ImColor(1.f, 1.f, 1.f), ImColor(0, 0, 0), 1);
+				}
+
+				if (is_tree_open)
+				{
+
 					if (ImGui::Button("Load in player"))
 					{
 						data.displaySystem = data.editableSystem;
@@ -454,6 +536,7 @@ namespace Pyewton
 					ImGui::TreePop();
 				}
 				ImGui::EndDisabled();
+
 
 				i++;
 			}
@@ -509,14 +592,25 @@ namespace Pyewton
 		{
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Save", nullptr, false, true))
+				{
+					SaveFunction();
+				}
+
+				if (ImGui::MenuItem("Open", nullptr, false, true))
+				{
+					LoadFunction();
+				}
+
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Window"))
 			{
-				ImGui::MenuItem("Viewport", nullptr, &show_viewport);
-				ImGui::MenuItem("Camera", nullptr, &show_cameraParameters);
-				ImGui::MenuItem("Precompute", nullptr, &show_precomputeDebug);
+				for (auto& subApp : subApps)
+				{
+					ImGui::MenuItem(subApp->name.data(), nullptr, &subApp->is_open);
+				}
 
 				ImGui::EndMenu();
 			}
@@ -526,13 +620,57 @@ namespace Pyewton
 
 	}
 
-	void Application::SyncBodyLists()
+	void Application::SaveFunction()
+	{
+
+		ifd::FileDialog::Instance().Save("JsonSaveDialog", "Save into a json", "JSON file (*.json){.json},.*", GetJsonFolder().string());
+
+		//ifd::FileDialog::Instance().IsDone("ShaderOpenDialog");
+		data.is_saving = true;
+
+	}
+
+	void Application::LoadFunction()
+	{
+		ifd::FileDialog::Instance().Open("JsonOpenDialog", "Open a json file", "JSON file (*.json){.json},.*", false, GetJsonFolder().string());
+
+		data.is_opening = true;
+	}
+
+	void Application::SyncBodyListsStyle()
 	{
 		int i = 0;
 
 		for (auto& body : data.editableSystem)
 		{
+			data.displaySystem.at(i).appearance = body.appearance;
+			i++;
+		}
+	}
+	void Application::UpdateFileDialog()
+	{
+		if (data.is_saving)
+		{
+			if (ifd::FileDialog::Instance().IsDone("JsonSaveDialog")) {
+				if (ifd::FileDialog::Instance().HasResult()) {
+					std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+					Json::SaveToFile(data.editableSystem, res.data());
+				}
+				ifd::FileDialog::Instance().Close();
+				data.is_saving = false;
+			}
+		}
 
+		if (data.is_opening)
+		{
+			if (ifd::FileDialog::Instance().IsDone("JsonOpenDialog")) {
+				if (ifd::FileDialog::Instance().HasResult()) {
+					std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+					data.editableSystem = Json::LoadFile(res.data());
+				}
+				ifd::FileDialog::Instance().Close();
+				data.is_opening = false;
+			}
 		}
 	}
 }

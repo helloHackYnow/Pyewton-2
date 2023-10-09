@@ -35,10 +35,15 @@ file(GLOB_RECURSE 3RD_PARTY
 
 file(GLOB_RECURSE SUB_APPS
 	CONFIGURE_DEPENDS
-	SubApps/*.h
-	SubApps/*.cpp)
+	SubApp/*.h
+	SubApp/*.cpp)
 
-add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Files.h" "Files.cpp" "AppData.h" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} ${3RD_PARTY} ${SUB_APPS} )
+file(GLOB_RECURSE JSON
+	CONFIGURE_DEPENDS
+	JSON/*.h
+	JSON/*.cpp)
+
+add_executable (Pyewton "main.cpp" "Pyewton.cpp" "Pyewton.h" "Files.h" "Files.cpp" "AppData.h" "AppControllers.h" ${BODY_FILES} ${RENDERER_FILES} ${SIMULATION_FILES} ${UI_FILES} ${3RD_PARTY} ${SUB_APPS} ${JSON} )
 
 set_property(TARGET Pyewton PROPERTY CXX_STANDARD 20)
 
@@ -65,6 +70,8 @@ find_package(imgui CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
+find_package(folly CONFIG REQUIRED)
 
 
-target_link_libraries(Pyewton PRIVATE imgui::imgui glad::glad glfw assimp::assimp)
+target_link_libraries(Pyewton PRIVATE imgui::imgui glad::glad glfw assimp::assimp JsonCpp::JsonCpp Folly::folly)

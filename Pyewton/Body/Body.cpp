@@ -68,7 +68,7 @@ void Body::Draw(Shader shader)
 	shader.setBool("isObjEmissive", appearance.isEmissive);
 	shader.setVec3("objLightColor", appearance.light.color);
 	shader.setFloat("objLightStrength", appearance.light.strength);
-	model.Draw(shader);
+	appearance.model.Draw(shader);
 }
 
 void Body::UpdateOrbit()

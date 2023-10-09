@@ -59,6 +59,7 @@ namespace Pyewton::Odin
 		Bloom bloom;
 
 		bool postprocesingEnable = true;
+		bool drawGridEnable = true;
 	private:
 		void UpdateLights(std::vector<Body>& bodyList);
 

@@ -11,7 +11,7 @@ namespace Pyewton::Frigg
 		int nbBody = bodyList.size();
 
 		int i = 0;
-		std::for_each(std::execution::unseq, bodyList.begin(), bodyList.end(),
+		std::for_each(std::execution::par, bodyList.begin(), bodyList.end(),
 			[&i, &bodyList, nbBody, simulated_duration](Body& body)
 			{
 				//Do other bodies affect the current one
@@ -90,18 +90,19 @@ namespace Pyewton::Frigg
 
 		holder->Init(bodyList.size(), N);
 
-		SimulateInHolder(bodyList, interval_duration, N, holder, EndCallback);
+		CreatePrecomputeThread(bodyList, interval_duration, N, holder, EndCallback);
 
 		return holder;
 	}
 
-	void Simulator::SimulateInHolder(BodyList &bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)())
+	std::thread* Simulator::CreatePrecomputeThread(BodyList& bodylist, float intervalDuration, int N, SimulationHolder* holder, void(*EndCallback)())
 	{
-		BodyList *my_BodyList = &bodylist;
+		BodyList* my_BodyList = &bodylist;
 
-		precomputeWorker = std::thread(
+		std::thread* local_ = new std::thread(
 			[=]() {
 				holder->isPrecomputing = true;
+
 				for (int i = 0; i < N; i++)
 				{
 					Frigg::Simulate(my_BodyList, intervalDuration);
@@ -110,9 +111,11 @@ namespace Pyewton::Frigg
 
 				//holder->PasteVelocity(*my_BodyList);
 				holder->isPrecomputing = false;
-				EndCallback();
+				if(EndCallback != nullptr) EndCallback();
 			}
 		);
+
+		return local_;
 	}
 
 	void Simulator::Start(BodyList* bodyList, float simulated_duration)

@@ -2,6 +2,7 @@
 
 std::filesystem::path shaders_dir("shader_dir");
 std::filesystem::path models_dir("3dfiles");
+std::filesystem::path json_dir("json");
 
 std::filesystem::path GetShaderPath(const char* path)
 {
@@ -17,4 +18,12 @@ std::filesystem::path GetModelPath(const char* path)
 	std::filesystem::path model = current / models_dir / std::filesystem::path(path);
 
 	return model;
+}
+
+std::filesystem::path GetJsonFolder()
+{
+	std::filesystem::path current = std::filesystem::current_path();
+	std::filesystem::path json = current / json_dir;
+
+	return json;
 }

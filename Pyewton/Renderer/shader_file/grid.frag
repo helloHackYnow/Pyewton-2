@@ -2,6 +2,9 @@
 
 float near = 0.01; //0.01
 float far = 100; //100
+
+float msaa_coef = 0.05;
+
 in vec3 nearPoint;
 in vec3 farPoint;
 in mat4 fragView;
@@ -50,6 +53,17 @@ void main() {
     float fading = max(0, (0.5 - linearDepth));
 
     vec4 outputColor = (grid(fragPos3D, 100, true) + grid(fragPos3D, 1, true))* float(t > 0);
+    outputColor += (grid(fragPos3D + vec3(msaa_coef, -msaa_coef, 0), 100, true) + grid(fragPos3D, 1, true))* float(t > 0);
+    outputColor += (grid(fragPos3D + vec3(msaa_coef, msaa_coef, 0), 100, true) + grid(fragPos3D, 1, true))* float(t > 0);
+    outputColor += (grid(fragPos3D + vec3(-msaa_coef, msaa_coef, 0), 100, true) + grid(fragPos3D, 1, true))* float(t > 0);
+    outputColor += (grid(fragPos3D + vec3(-msaa_coef, -msaa_coef, 0), 100, true) + grid(fragPos3D, 1, true))* float(t > 0);
+
+    outputColor /= 5;
+
+
+
+
+
     outputColor.xyz *= fading;
 
     FragColor = outputColor;

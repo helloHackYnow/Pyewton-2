@@ -16,7 +16,7 @@ public:
 	{
 		color[0] = color_.x;
 		color[1] = color_.y;
-		color[2] = color_.y;
+		color[2] = color_.z;
 	}
 	
 	Color(float r, float g, float b) 
